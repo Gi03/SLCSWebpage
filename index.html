@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Saint Louis College of Solano, Inc.</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.js"></script>
+<style>
+  :root {
+    --navy: 	 #16337a;
+    --navy-dark: #0d2456;
+    --text-dark: #1a1a1a;
+    --bg-top: 	 #eef0f4;
+    --bg-bottom: #d7dbe4;
+  }
+  * { box-sizing: border-box; }
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
+    color: var(--text-dark);
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    min-height: 100%;
+  }
+  a { color: inherit; text-decoration: none; }
+  
+  @keyframes slideInLeft{
+	from{
+	opacity: 0;
+	transform: translateX(-40px);}
+	to{opacity: 1;
+	transform: translateX(0);}
+  }
+  @keyframes fadeUp{
+	from{opacity: 0;
+	transform: translateY(20px);}
+	to{opacity: 1;
+	transform: translateY(0);}
+  }
+  @keyframes slideInRight{
+	from{opacity: 0;
+		transform: translateX(40px);}
+	to{opacity: 1;
+		transform: translateX(0);}
+  }
+
+ header.banner {
+  width: 100%;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 48px;
+  background-image: url('images/SLS.jpg');
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  line-height: normal;   /* remove the line-height: 0 */
+  position: relative;
+}
+
+header.banner img {
+  height: 140px;         /* set only ONE dimension */
+  width: auto;           /* keeps the original proportions */
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 6px rgba(0,0,0,0.8));
+  animation: slideInLeft 0.8s ease-out both;
+}
+
+header.banner .banner-text h1 {
+  margin: 0 0 4px;
+  font-size: 60px;
+  font-family: 'Old English Text MT','Engravers Old English','Fraktur', fantasy, Serif; 
+  text-shadow: 0 2px 4px rgba(0,0,0,0.6);  /* keeps text readable on the photo */
+  animation: fadeUp 0.8s ease-out 0.3s both;
+}
+header.banner .banner-text h2 {
+  margin: 2px 0 0;
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  animation: fadeUp 0.8s ease-out 0.3s both;
+}
+
+header.banner .banner-text p {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  font-size:22px;
+  line-height: 1.3;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  animation: fadeUp 0.8s ease-out 0.3s both;
+}
+
+  main {
+    max-width: 1366px;
+    margin: 0 auto;
+    padding: 24px 48px 60px;
+    position: relative;
+  }
+
+  .login-btn {
+    position: absolute;
+    right: 48px;
+	bottom: 20px;
+    background: linear-gradient(180deg, #2f56b3 0%, var(--navy) 55%, var(--navy-dark) 100%);
+    color: #fff;
+    font-weight: bold;
+    font-size: 17px;
+    letter-spacing: 0.5px;
+    padding: 14px 36px;
+    border-radius: 24px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.4);
+    border: 1px solid #0a1c47;
+	
+	opacity: 0;
+	transition: opacity 0.3s ease;
+  }
+  header.banner .login-btn:hover,
+  header.banner .login-btn:focus-visible{opacity: 1;}
+	
+	ul{
+		list-style: none;
+		padding: 0;
+	}
+	
+	li{
+		position: relative;
+		padding-left: 30px;
+		margin-bottom: 10px;
+	}
+	
+	li::before{
+		content:"";
+		position:absolute;
+		left: 0px;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 20px;
+		height: 20px;
+		background-size: contain;
+		background-repeat: no-repeat;
+	}
+	
+	li.bullet-bscrim::before{
+		background-image: url('images/bscrim_logo.png');
+	}
+	li.bullet-bsma::before{
+		background-image: url('images/bsma_logo.png');
+	}
+	
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1.2fr;
+    gap: 40px;
+    padding-top: 10px;
+  }
+
+  nav.links {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding-top: 6px;
+  }
+  
+  nav.links a.nav-link {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.15;
+    display: block;
+    padding: 8px 12px;
+    margin: 0 -12px;
+    border-radius: 8px;
+    transition: background-color 0.18s ease, color 0.18s ease;
+  }
+	nav.links a.nav-link:hover,
+	nav.links a.nav-link:focus-visible,
+	.has-submenu.open .nav-link.toggle {
+    background-color: var(--navy);
+    color: #fff;
+  }
+
+	.has-submenu { display: flex; flex-direction: column; }
+	.nav-link.toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+  }
+  
+  .nav-link.toggle .caret {
+    font-size: 0px;
+    transition: transform 0.2s ease, color 0.18s ease;
+    flex-shrink: 0;
+    color: inherit;
+  }
+  
+  .has-submenu.open .nav-link.toggle .caret { transform: rotate(90deg); }
+
+  .submenu {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    border-left: 3px solid var(--navy);
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.28s ease, opacity 0.22s ease, margin-top 0.28s ease;
+  }
+  
+  .has-submenu.open .submenu {
+    max-height: 200px;
+    opacity: 1;
+    margin-top: 12px;
+  }
+  
+  .submenu li { 
+		padding-left: 32px;
+		display: flex;
+		align-items: center;
+		min-height: 20px;
+		transform-origin: left center;
+		cursor: pointer;		
+	}
+  .submenu a {
+    font-size: 16px;
+    font-weight: 600;
+    color: #33415c;
+	width: 100%;
+  }
+  .submenu a:hover { color: var(--navy); }
+
+  h2.section-title {
+    font-size: 34px;
+    font-weight: 800;
+    margin: 0 0 12px;
+    letter-spacing: -0.5px;
+  }
+  .mission-title { font-size: 38px; margin-top: -4px; }
+
+  .section-body p {
+    font-size: 15.5px;
+    line-height: 1.5;
+    margin: 0 0 16px;
+	text-align: justify;
+  }
+  .section-body .mission-title:not(:first-child) {
+	margin-top: 24px;
+	}
+
+  .contact {
+    position: absolute;
+    right: 48px;
+    bottom: -110px;
+    text-align: right;
+	font-size: 10px;
+  }
+
+  footer {
+    max-width: 1366px;
+    margin: 0 auto;
+    padding: 40px 48px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+
+  .diocese {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .diocese img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+  }
+  .diocese-text {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .contact-us {
+    text-align: right;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .contact-us .title {
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: 0.3px;
+  }
+  .contact-us a {
+    text-decoration: underline;
+  }
+  .copyright {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;                 /* distance from the bottom of the footer */
+  transform: translateX(-50%);  /* centers it exactly */
+  font-size: 13px;
+  color: #33415c;
+  text-align: center;
+  white-space: nowrap;
+}
+
+  @media (max-width: 980px) {
+    .content-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    main { padding: 24px 24px 40px; }
+  }
+  @media (max-width: 620px) {
+    .content-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 20px; align-items: flex-start; }
+    .contact-us { text-align: left; }
+	.copyright {  position: static;  transform: none;  white-space: normal;  text-align: left;
+}
+  }
+  @media (max-width:620px) { header.banner{ flex-wrap: wrap; padding: 20px 24px;}
+  header.banner .login-btn{ position: static; margin-top:12px;}
+  }
+  @media (hover: none) {
+    header.banner .login-btn { opacity: 1; }
+  }
+
+  /* ===== Virtual Campus Tour pop-up ===== */
+  .tour-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  .tour-modal.show { display: flex; }
+  .tour-box {
+    position: relative;
+    width: min(1000px, 100%);
+    height: min(600px, 85vh);
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  .tour-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  #tourPano {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .tour-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 6;
+  }
+  .tour-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 60px;
+    border: 0;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 5;
+  }
+  .tour-nav.prev { left: 0; border-radius: 0 8px 8px 0; }
+  .tour-nav.next { right: 0; border-radius: 8px 0 0 8px; }
+  .tour-nav:hover { background: var(--navy); }
+  .tour-caption {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 12px 16px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.75));
+    color: #fff;
+    text-align: center;
+    font-size: 15px;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+</style>
+</head>
+<body>
+
+	<header class="banner">
+		<img src="logo/SLCSI.png" alt="Saint Louis College of Solano, Inc. logo">
+		<div class="banner-text">
+			<h1>Saint Louis College of Solano, Inc.</h1>
+			<h2>Pro Deo, Familia et Patria</h2>
+			<p>Solano, Nueva Vizcaya</p>
+			<a href="#" class="login-btn">LOGIN</a>
+		</div>
+	</header>
+
+  <main>
+    
+
+    <div class="content-grid">
+      <nav class="links">
+        <div class="has-submenu" id="tourMenu">
+          <a class="nav-link toggle" href="#tour" id="tourToggle" aria-expanded="false" aria-controls="tourSubmenu">
+            <span>Take a Campus Tour Now</span>
+            <span class="caret">&gt;</span>
+          </a>
+          <ul class="submenu" id="tourSubmenu">
+            <li><a href="#virtual-tour" id="openTour">Virtual Campus Tour</a></li>
+            <li><a href="#schedule-visit">Schedule a Visit</a></li>
+          </ul>
+        </div>
+
+        <div class="has-submenu" id="coursesMenu">
+          <a class="nav-link toggle" href="#courses" id="coursesToggle" aria-expanded="false" aria-controls="coursesSubmenu">
+            <span>Courses &amp; Offerings</span>
+            <span class="caret">&gt;</span>
+          </a>
+          <ul class="submenu" id="coursesSubmenu">
+            <li class="bullet-bscrim"><a href="#bs-criminology">BS Criminology</a></li>
+            <li class="bullet-bsma"><a href="#bs-management-accounting">BS Management Accounting</a></li>
+          </ul>
+        </div>
+
+        <div class="has-submenu" id="scholarshipsMenu">
+          <a class="nav-link toggle" href="#scholarships" id="scholarshipsToggle" aria-expanded="false" aria-controls="scholarshipsSubmenu">
+            <span>Scholarships &amp; Discounts</span>
+            <span class="caret">&gt;</span>
+          </a>
+          <ul class="submenu" id="scholarshipsSubmenu">
+            <li><a href="#academic-scholarships">Academic Scholarships</a></li>
+            <li><a href="#sibling-alumni-discounts">Sibling &amp; Alumni Discounts</a></li>
+          </ul>
+        </div>
+
+        <div class="has-submenu" id="newsMenu">
+          <a class="nav-link toggle" href="#news" id="newsToggle" aria-expanded="false" aria-controls="newsSubmenu">
+            <span>News &amp; Announcements</span>
+            <span class="caret">&gt;</span>
+          </a>
+          <ul class="submenu" id="newsSubmenu">
+            <li><a href="#latest-announcements">Latest Announcements</a></li>
+            <li><a href="#school-calendar">School Calendar</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <section class="section-body">
+        <h2 class="section-title">History</h2>
+        <p>Established in 1935, formerly known as Saint Louis School. Now Saint Louis College of Solano.</p>
+        <p>Founder:<br> Rev. Fr. Jose Waffelaert, CICM<br>1934<br>Opened on June 10, 1935</p>
+        <p>First College President:<br>Rev. Fr. Victor M. Abijay, Ph.D.<br>2024</p>
+      </section>
+
+      <section class="section-body">
+        <h2 class="section-title mission-title">Mission</h2>
+        <p>Guided by the Gospel values, DBES commits to quality and transformative Catholic Education 
+		for the growth and development of stakeholders through contextualized inclusive learner-centered curriculum, 
+		enhanced employees' professional developmental opportunities, and strengthened partnership with the pursuit of 
+		Christian discipleship and witnessing, community building, and stewardship for the service of God, family, and country.</p>
+        <h2 class="section-title mission-title">Vision</h2>
+		<p>A vibrant Catholic by the Gospel values, DBES commits to quality and transformative Catholic Education 
+		for the growth and development of stakeholders through contextualized inclusive learner-centered curriculum, 
+		enhanced employees' professional opportunities, and strengthened partnership with the stakeholders in the pursuit 
+		of Christian discipleship and witnessing, community  building, stewardship for the service of God, family, and country.</p>
+      </section>
+
+      
+    </div>
+  </main>
+
+  <footer>
+    <div class="diocese">
+      <img src="logo/DBES.png" alt="Diocese of Bayombong Educational System seal">
+      <div class="diocese-text">Diocese of Bayombong<br>Educational System</div>
+    </div>
+	<div class="copyright">
+    &copy; <span id="year">2026</span> Saint Louis College of Solano, Inc. All rights reserved.
+  </div>
+
+    <div class="contact-us">
+      <div class="title">CONTACT US!</div>
+      <div>0947 502 2362</div>
+      <div>TELEFAX # (078) 326 – 7458</div>
+      <div><a href="mailto:saintlouiscollegeofsolano@gmail.com">saintlouiscollegeofsolano@gmail.com</a></div>
+    </div>
+  </footer>
+
+  <div class="tour-modal" id="tourModal" aria-hidden="true">
+    <div class="tour-box" role="dialog" aria-label="Virtual Campus Tour">
+      <button class="tour-close" id="tourClose" aria-label="Close">&times;</button>
+      <img id="tourImg" src="" alt="">
+      <div id="tourPano"></div>
+      <button class="tour-nav prev" id="tourPrev" aria-label="Previous photo">&#10094;</button>
+      <button class="tour-nav next" id="tourNext" aria-label="Next photo">&#10095;</button>
+      <div class="tour-caption" id="tourCaption"></div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var menuIds = ['tourMenu', 'coursesMenu', 'scholarshipsMenu', 'newsMenu'];
+
+    menuIds.forEach(function (menuId) {
+      var menu = document.getElementById(menuId);
+      if (!menu) return;
+      var toggle = menu.querySelector('.nav-link.toggle');
+      if (!toggle) return;
+
+      toggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        var isOpen = menu.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+        // Animate the list items only when the menu opens
+        if (isOpen) {
+          var items = menu.querySelectorAll('.submenu li');
+          items.forEach(function (li, i) {
+            li.animate(
+              [
+                { opacity: 0, transform: 'translateX(-20px)' },
+                { opacity: 1, transform: 'translateX(0)' }
+              ],
+              {
+                duration: 400,
+                delay: i * 120,       // staggers each item
+                easing: 'ease-out',
+                fill: 'backwards'     // keeps it hidden during the delay
+              }
+            );
+          });
+        }
+      });
+    });
+	document.getElementById('year').textContent = new Date().getFullYear();
+    // Pop effect when any list item is clicked
+    document.querySelectorAll('.submenu li').forEach(function (li) {
+      li.addEventListener('click', function () {
+        li.animate(
+          [
+            { transform: 'scale(1)' },
+            { transform: 'scale(1.08)' },
+            { transform: 'scale(1)' }
+          ],
+          { duration: 300, easing: 'ease-out' }
+        );
+      });
+    });
+  })();
+
+  /* ===== Virtual Campus Tour ===== */
+
+var tourPhotos = [];
+var modal     = document.getElementById('tourModal');
+var tourImg   = document.getElementById('tourImg');
+var tourPano  = document.getElementById('tourPano');
+var caption   = document.getElementById('tourCaption');
+var current   = 0;
+var panoViewer = null;
+
+function clearPano() {
+  if (panoViewer) { panoViewer.destroy(); panoViewer = null; }
+}
+
+function showPhoto(i) {
+  current = (i + tourPhotos.length) % tourPhotos.length;
+  var p = tourPhotos[current];
+  clearPano();
+
+  if (p.type === 'pano' && window.pannellum) {
+    tourImg.style.display = 'none';
+    tourPano.style.display = 'block';
+    panoViewer = pannellum.viewer('tourPano', {
+      type: 'equirectangular',
+      panorama: p.file,
+      autoLoad: true,
+      autoRotate: -2,        // slow spin; set to 0 to turn off
+      showControls: true
+    });
+  } else {
+    tourPano.style.display = 'none';
+    tourImg.style.display = 'block';
+    tourImg.src = p.file;
+    tourImg.alt = p.caption;
+  }
+
+  var tag = p.type === 'pano' ? ' [360\u00B0 drag to look around]' : '';
+  caption.textContent = p.caption + '  (' + (current + 1) + ' / ' + tourPhotos.length + ')' + tag;
+}
+
+function openTour(e) {
+  e.preventDefault();
+  fetch('photos.php', { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (list) {
+      if (!list.length) { alert('Tour photos are coming soon.'); return; }
+      tourPhotos = list;
+      modal.classList.add('show');          // show first so the 360 viewer can measure its size
+      modal.setAttribute('aria-hidden', 'false');
+      showPhoto(0);
+    })
+    .catch(function () { alert('Could not load the tour photos. Please try again later.'); });
+}
+
+function closeTour() {
+  clearPano();
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+document.getElementById('openTour').addEventListener('click', openTour);
+document.getElementById('tourClose').addEventListener('click', closeTour);
+document.getElementById('tourPrev').addEventListener('click', function () { if (tourPhotos.length) showPhoto(current - 1); });
+document.getElementById('tourNext').addEventListener('click', function () { if (tourPhotos.length) showPhoto(current + 1); });
+modal.addEventListener('click', function (e) { if (e.target === modal) closeTour(); });
+document.addEventListener('keydown', function (e) {
+  if (!modal.classList.contains('show')) return;
+  if (e.key === 'Escape') closeTour();
+  if (e.key === 'ArrowLeft') showPhoto(current - 1);
+  if (e.key === 'ArrowRight') showPhoto(current + 1);
+});
+</script>
+</body>
+</html>
