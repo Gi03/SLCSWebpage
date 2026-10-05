@@ -331,7 +331,15 @@ header.banner .banner-text p {
   }
   @media (max-width:620px) { header.banner{ flex-wrap: wrap; padding: 20px 24px;}
   header.banner img { height: 90px; }
-  header.banner .login-btn{ position: static; margin-top:12px;}
+  header.banner .login-btn {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    bottom: auto;
+    margin: 0;
+    padding: 8px 20px;
+    font-size: 14px;
+  }
   }
   @media (hover: none) {
     header.banner .login-btn { opacity: 1; }
