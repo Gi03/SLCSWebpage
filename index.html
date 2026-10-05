@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Saint Louis College of Solano, Inc.</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pannellum/2.5.6/pannellum.js"></script>
 <style>
@@ -72,24 +73,16 @@ header.banner img {
 
 header.banner .banner-text h1 {
   margin: 0 0 4px;
-  font-size: 60px;
-  font-family: 'Old English Text MT','Engravers Old English','Fraktur', fantasy, Serif; 
+  font-size: clamp(28px, 7vw, 60px);
+  font-family: 'UnifrakturCook', 'Old English Text MT', 'Engravers Old English', 'Fraktur', serif; 
   text-shadow: 0 2px 4px rgba(0,0,0,0.6);  /* keeps text readable on the photo */
-  animation: fadeUp 0.8s ease-out 0.3s both;
-}
-header.banner .banner-text h2 {
-  margin: 2px 0 0;
-  font-size: 30px;
-  line-height: 1.2;
-  font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.6);
   animation: fadeUp 0.8s ease-out 0.3s both;
 }
 
 header.banner .banner-text p {
   font-family: Arial, sans-serif;
   margin: 0;
-  font-size:22px;
+  font-size: clamp(14px, 3.5vw, 22px);
   line-height: 1.3;
   text-shadow: 0 2px 4px rgba(0,0,0,0.6);
   animation: fadeUp 0.8s ease-out 0.3s both;
@@ -251,6 +244,7 @@ header.banner .banner-text p {
     line-height: 1.5;
     margin: 0 0 16px;
 	text-align: justify;
+	hyphens: auto;
   }
   .section-body .mission-title:not(:first-child) {
 	margin-top: 24px;
@@ -303,16 +297,26 @@ header.banner .banner-text p {
   .contact-us a {
     text-decoration: underline;
   }
+  /* Keep the copyright bar at the very bottom of the page, even on short pages */
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  main, footer { width: 100%; }
+  main { flex: 1 0 auto; }
+
   .copyright {
-  position: absolute;
-  left: 50%;
-  bottom: 14px;                 /* distance from the bottom of the footer */
-  transform: translateX(-50%);  /* centers it exactly */
-  font-size: 13px;
-  color: #33415c;
-  text-align: center;
-  white-space: nowrap;
-}
+    width: 100%;
+    margin-top: auto;
+    padding: 14px 24px calc(14px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid rgba(22,51,122,0.25);
+    background: rgba(255,255,255,0.45);
+    font-size: 13px;
+    color: #33415c;
+    text-align: center;
+  }
 
   @media (max-width: 980px) {
     .content-grid {
@@ -324,10 +328,9 @@ header.banner .banner-text p {
     .content-grid { grid-template-columns: 1fr; }
     footer { flex-direction: column; gap: 20px; align-items: flex-start; }
     .contact-us { text-align: left; }
-	.copyright {  position: static;  transform: none;  white-space: normal;  text-align: left;
-}
   }
   @media (max-width:620px) { header.banner{ flex-wrap: wrap; padding: 20px 24px;}
+  header.banner img { height: 90px; }
   header.banner .login-btn{ position: static; margin-top:12px;}
   }
   @media (hover: none) {
@@ -350,6 +353,7 @@ header.banner .banner-text p {
     position: relative;
     width: min(1000px, 100%);
     height: min(600px, 85vh);
+    height: min(600px, 85dvh);
     background: #000;
     border-radius: 12px;
     overflow: hidden;
@@ -372,8 +376,8 @@ header.banner .banner-text p {
     position: absolute;
     top: 8px;
     right: 8px;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border: 0;
     border-radius: 50%;
     background: var(--navy);
@@ -418,7 +422,7 @@ header.banner .banner-text p {
 		<img src="logo/SLCSI.png" alt="Saint Louis College of Solano, Inc. logo">
 		<div class="banner-text">
 			<h1>Saint Louis College of Solano, Inc.</h1>
-			<h2>Pro Deo, Familia et Patria</h2>
+			<p>Pro Deo, Familia et Patria </p>
 			<p>Solano, Nueva Vizcaya</p>
 			<a href="#" class="login-btn">LOGIN</a>
 		</div>
@@ -503,9 +507,6 @@ header.banner .banner-text p {
       <img src="logo/DBES.png" alt="Diocese of Bayombong Educational System seal">
       <div class="diocese-text">Diocese of Bayombong<br>Educational System</div>
     </div>
-	<div class="copyright">
-    &copy; <span id="year">2026</span> Saint Louis College of Solano, Inc. All rights reserved.
-  </div>
 
     <div class="contact-us">
       <div class="title">CONTACT US!</div>
@@ -514,6 +515,10 @@ header.banner .banner-text p {
       <div><a href="mailto:saintlouiscollegeofsolano@gmail.com">saintlouiscollegeofsolano@gmail.com</a></div>
     </div>
   </footer>
+
+  <div class="copyright">
+    &copy; <span id="year">2026</span> Saint Louis College of Solano, Inc. All rights reserved.
+  </div>
 
   <div class="tour-modal" id="tourModal" aria-hidden="true">
     <div class="tour-box" role="dialog" aria-label="Virtual Campus Tour">
