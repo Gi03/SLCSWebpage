@@ -487,6 +487,15 @@ header.banner .banner-text p {
   .vm-body h3 { margin:14px 0 6px; color:#16337a; font-size:1.05rem; letter-spacing:.5px; }
   .vm-body p { margin:0; line-height:1.6; text-align:justify; }
   .vm-close { position:absolute; top:8px; right:14px; background:transparent; border:0; color:#fff; font-size:2rem; line-height:1; cursor:pointer; }
+
+  /* ===== School Calendar pop up ===== */
+  .cal-modal { display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,.65); align-items:center; justify-content:center; padding:16px; }
+  .cal-modal.show { display:flex; }
+  .cal-box { position:relative; width:100%; max-width:960px; height:min(90vh, 720px); background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,.4); display:flex; flex-direction:column; animation:fadeUp .3s ease-out; }
+  .cal-head { background:#16337a; color:#fff; padding:14px 50px 14px 22px; font-weight:bold; font-size:1.1rem; flex:none; }
+  .cal-box iframe { flex:1; width:100%; border:0; display:block; }
+  .cal-empty { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; color:#444; }
+  .cal-close { position:absolute; top:6px; right:14px; z-index:2; background:transparent; border:0; color:#fff; font-size:2rem; line-height:1; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -547,7 +556,7 @@ header.banner .banner-text p {
           </a>
           <ul class="submenu" id="newsSubmenu">
             <li class="bullet-LAnnouncement"><a href="#latest-announcements">Latest Announcements</a></li>
-            <li class="bullet-SchoolCalendar"><a href="#school-calendar">School Calendar</a></li>
+            <li class="bullet-SchoolCalendar"><a href="#school-calendar" id="openCal">School Calendar</a></li>
           </ul>
         </div>
       </nav>
@@ -602,6 +611,14 @@ header.banner .banner-text p {
       <button class="tour-nav prev" id="tourPrev" aria-label="Previous photo">&#10094;</button>
       <button class="tour-nav next" id="tourNext" aria-label="Next photo">&#10095;</button>
       <div class="tour-caption" id="tourCaption"></div>
+    </div>
+  </div>
+
+  <div class="cal-modal" id="calModal" aria-hidden="true">
+    <div class="cal-box" role="dialog" aria-label="School Calendar">
+      <button class="cal-close" id="calClose" aria-label="Close">&times;</button>
+      <div class="cal-head">Saint Louis College of Solano &ndash; School Calendar</div>
+      <div id="calBody"></div>
     </div>
   </div>
 
@@ -783,6 +800,47 @@ vmTrigger.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.
 document.getElementById('vmClose').addEventListener('click', closeVM);
 vmModal.addEventListener('click', function (e) { if (e.target === vmModal) closeVM(); });
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && vmModal.classList.contains('show')) closeVM(); });
+
+/* ===== School Calendar pop up (Google Calendar) ===== */
+// Paste the school's Google Calendar ID here (Google Calendar > Settings > Integrate calendar > Calendar ID).
+// The calendar must be set to "Make available to public" for visitors to see it.
+var CALENDAR_ID = 'saintlouiscollegeofsolano@gmail.com';
+var CALENDAR_TZ = 'Asia/Manila';
+
+var calModal = document.getElementById('calModal');
+// Accepts a plain Calendar ID, a full embed link, or the whole <iframe> code, and returns just the ID
+function cleanCalId(v) {
+  v = String(v).trim();
+  var m = v.match(/[?&]src=([^&"'\s]+)/);
+  if (m) v = decodeURIComponent(m[1]);
+  return v.replace(/^["']|["']$/g, '').trim();
+}
+var calBody = document.getElementById('calBody');
+function openCal(e) {
+  e.preventDefault();
+  calBody.innerHTML = '';
+  if (!CALENDAR_ID || CALENDAR_ID.indexOf('PASTE_') === 0) {
+    calBody.innerHTML = '<div class="cal-empty" style="height:300px">The school calendar will be available soon.</div>';
+  } else {
+    var f = document.createElement('iframe');
+    f.title = 'Saint Louis College of Solano Google Calendar';
+    f.style.height = 'calc(min(90vh, 720px) - 54px)';
+    f.src = 'https://calendar.google.com/calendar/embed?src=' + encodeURIComponent(cleanCalId(CALENDAR_ID)) +
+            '&ctz=' + encodeURIComponent(CALENDAR_TZ) + '&mode=MONTH&showTitle=0&showPrint=0&showTz=0';
+    calBody.appendChild(f);
+  }
+  calModal.classList.add('show');
+  calModal.setAttribute('aria-hidden', 'false');
+}
+function closeCal() {
+  calModal.classList.remove('show');
+  calModal.setAttribute('aria-hidden', 'true');
+  calBody.innerHTML = '';
+}
+document.getElementById('openCal').addEventListener('click', openCal);
+document.getElementById('calClose').addEventListener('click', closeCal);
+calModal.addEventListener('click', function (e) { if (e.target === calModal) closeCal(); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && calModal.classList.contains('show')) closeCal(); });
 </script>
 </body>
 </html>
