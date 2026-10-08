@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schedule a Visit | Saint Louis College of Solano, Inc.</title>
+<style>
+  :root { --navy:#16337a; --navy-dark:#0d2456; --text:#1a1a1a; --line:#c9cfdc; --bg:#ffffff; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; font-family:Arial,'Helvetica Neue',Helvetica,sans-serif; color:var(--text); background:var(--bg); }
+  .head { background:var(--navy); color:#fff; padding:18px 24px; }
+  .head h1 { margin:0; font-size:1.3rem; }
+  .head p { margin:4px 0 0; font-size:.9rem; opacity:.85; }
+  form { padding:20px 24px 24px; display:grid; gap:14px; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  label { display:block; font-size:.85rem; font-weight:bold; margin-bottom:4px; color:var(--navy-dark); }
+  input,select,textarea { width:100%; padding:10px; font:inherit; border:1px solid var(--line); border-radius:6px; background:#fff; }
+  input:focus,select:focus,textarea:focus { outline:2px solid var(--navy); border-color:var(--navy); }
+  textarea { resize:vertical; min-height:70px; }
+  .actions { display:flex; gap:10px; justify-content:flex-end; margin-top:4px; }
+  button { font:inherit; font-weight:bold; padding:10px 20px; border-radius:6px; border:0; cursor:pointer; }
+  .primary { background:var(--navy); color:#fff; }
+  .primary:hover { background:var(--navy-dark); }
+  .secondary { background:#e6e9f0; color:var(--navy-dark); }
+  .done { display:none; padding:40px 24px; text-align:center; }
+  .done h2 { color:var(--navy); margin-top:0; }
+  .note { font-size:.78rem; color:#555; }
+  @media (max-width:520px){ .row { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>Schedule a Visit</h1>
+    <p>Saint Louis College of Solano, Inc.</p>
+  </div>
+
+  <form id="visitForm">
+    <div class="row">
+      <div><label for="name">Full name *</label><input id="name" required autocomplete="name"></div>
+      <div><label for="phone">Contact number *</label><input id="phone" type="tel" required autocomplete="tel"></div>
+    </div>
+    <div><label for="email">Email *</label><input id="email" type="email" required autocomplete="email"></div>
+    <div class="row">
+      <div><label for="date">Preferred date *</label><input id="date" type="date" required></div>
+      <div>
+        <label for="time">Preferred time *</label>
+        <select id="time" required>
+          <option value="">Select a time</option>
+          <option>8:00 AM</option><option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option>
+          <option>1:00 PM</option><option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="course">Course of interest</label>
+        <select id="course">
+          <option value="">Not sure yet</option>
+          <option>BS Criminology</option>
+          <option>BS Management Accounting</option>
+        </select>
+      </div>
+      <div><label for="guests">Number of visitors</label><input id="guests" type="number" min="1" max="20" value="1"></div>
+    </div>
+    <div><label for="msg">Message (optional)</label><textarea id="msg"></textarea></div>
+    <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+    <p class="note" id="status" role="status">The school office will contact you to confirm your schedule.</p>
+    <div class="actions">
+      <button type="button" class="secondary" id="cancel">Cancel</button>
+      <button type="submit" class="primary">Request Visit</button>
+    </div>
+  </form>
+
+  <div class="done" id="done">
+    <h2>Thank you!</h2>
+    <p id="doneMsg">Your visit request was sent. The school office will contact you to confirm your schedule.</p>
+    <button class="primary" id="closeDone">Close</button>
+  </div>
+
+<script>
+  var dateEl = document.getElementById('date');
+  dateEl.min = new Date().toISOString().split('T')[0];
+
+  // Close: tell the parent page (if inside the pop up), otherwise go back
+  function closeMe() {
+    if (window.parent !== window) window.parent.postMessage('closeScheduleVisit', '*');
+    else window.history.length > 1 ? history.back() : window.close();
+  }
+  document.getElementById('cancel').onclick = closeMe;
+  document.getElementById('closeDone').onclick = closeMe;
+
+  var form = document.getElementById('visitForm');
+  var statusEl = document.getElementById('status');
+  var submitBtn = form.querySelector('.primary');
+
+  function showDone(msg) {
+    if (msg) document.getElementById('doneMsg').textContent = msg;
+    form.style.display = 'none';
+    document.getElementById('done').style.display = 'block';
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = function (id) { return document.getElementById(id).value.trim(); };
+    var data = new FormData();
+    ['name','phone','email','date','time','course','guests','msg','website'].forEach(function (id) { data.append(id, v(id)); });
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    statusEl.style.color = '';
+
+    fetch('submit-visit.php', { method: 'POST', body: data })
+      .then(function (r) { return r.json().then(function (j) { return { status: r.status, json: j }; }); })
+      .then(function (res) {
+        if (res.json.ok) { showDone(); return; }
+        // Validation problem: let the visitor fix it
+        statusEl.textContent = res.json.error || 'Please check your details and try again.';
+        statusEl.style.color = '#b00020';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Request Visit';
+      })
+      .catch(function () {
+        // Server unreachable (e.g. file opened without PHP): fall back to the visitor's email app
+        var body = 'Campus Visit Request\n\nName: ' + v('name') + '\nContact: ' + v('phone') + '\nEmail: ' + v('email') +
+          '\nPreferred date: ' + v('date') + '\nPreferred time: ' + v('time') +
+          '\nCourse of interest: ' + (v('course') || 'Not sure yet') +
+          '\nVisitors: ' + v('guests') + '\n\nMessage: ' + v('msg');
+        window.location.href = 'mailto:saintlouiscollegeofsolano@gmail.com?subject=' +
+          encodeURIComponent('Schedule a Visit - ' + v('name')) + '&body=' + encodeURIComponent(body);
+        showDone('Your email app should open with the request ready to send. Please press Send to finish.');
+      });
+  });
+</script>
+</body>
+</html>
