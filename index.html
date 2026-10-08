@@ -466,6 +466,13 @@ header.banner .banner-text p {
     pointer-events: none;
   }
 
+
+  /* ===== Schedule a Visit pop up ===== */
+  .visit-modal { display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,.65); align-items:center; justify-content:center; padding:16px; }
+  .visit-modal.show { display:flex; }
+  .visit-box { position:relative; width:100%; max-width:620px; height:min(90vh, 720px); background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,.4); animation:fadeUp .3s ease-out; }
+  .visit-box iframe { width:100%; height:100%; border:0; display:block; }
+  .visit-close { position:absolute; top:8px; right:12px; z-index:2; background:transparent; border:0; color:#fff; font-size:2rem; line-height:1; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -493,7 +500,7 @@ header.banner .banner-text p {
           </a>
           <ul class="submenu" id="tourSubmenu">
             <li class="bullet-VCTour"><a href="#virtual-tour" id="openTour">Virtual Campus Tour</a></li>
-            <li class="bullet-SVisit"><a href="#schedule-visit">Schedule a Visit</a></li>
+            <li class="bullet-SVisit"><a href="schedule-visit.html" id="openVisit">Schedule a Visit</a></li>
           </ul>
         </div>
 
@@ -581,6 +588,13 @@ header.banner .banner-text p {
       <button class="tour-nav prev" id="tourPrev" aria-label="Previous photo">&#10094;</button>
       <button class="tour-nav next" id="tourNext" aria-label="Next photo">&#10095;</button>
       <div class="tour-caption" id="tourCaption"></div>
+    </div>
+  </div>
+
+  <div class="visit-modal" id="visitModal" aria-hidden="true">
+    <div class="visit-box" role="dialog" aria-label="Schedule a Visit">
+      <button class="visit-close" id="visitClose" aria-label="Close">&times;</button>
+      <iframe id="visitFrame" title="Schedule a Visit form" src="about:blank"></iframe>
     </div>
   </div>
 
@@ -705,6 +719,28 @@ document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') closeTour();
   if (e.key === 'ArrowLeft') showPhoto(current - 1);
   if (e.key === 'ArrowRight') showPhoto(current + 1);
+});
+
+/* ===== Schedule a Visit pop up ===== */
+var visitModal = document.getElementById('visitModal');
+var visitFrame = document.getElementById('visitFrame');
+function openVisit(e) {
+  e.preventDefault();
+  visitFrame.src = 'schedule-visit.html';   // reloads a fresh form each time
+  visitModal.classList.add('show');
+  visitModal.setAttribute('aria-hidden', 'false');
+}
+function closeVisit() {
+  visitModal.classList.remove('show');
+  visitModal.setAttribute('aria-hidden', 'true');
+  visitFrame.src = 'about:blank';
+}
+document.getElementById('openVisit').addEventListener('click', openVisit);
+document.getElementById('visitClose').addEventListener('click', closeVisit);
+visitModal.addEventListener('click', function (e) { if (e.target === visitModal) closeVisit(); });
+window.addEventListener('message', function (e) { if (e.data === 'closeScheduleVisit') closeVisit(); });
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && visitModal.classList.contains('show')) closeVisit();
 });
 </script>
 </body>
