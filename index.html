@@ -492,7 +492,8 @@ header.banner .banner-text p {
   .cal-modal { display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,.65); align-items:center; justify-content:center; padding:16px; }
   .cal-modal.show { display:flex; }
   .cal-box { position:relative; width:100%; max-width:960px; height:min(90vh, 720px); background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,.4); display:flex; flex-direction:column; animation:fadeUp .3s ease-out; }
-  .cal-head { background:#16337a; color:#fff; padding:14px 50px 14px 22px; font-weight:bold; font-size:1.1rem; flex:none; }
+  .cal-head { background:#16337a; color:#fff; padding:10px 50px 10px 22px; font-weight:bold; font-size:1.1rem; flex:none; display:flex; align-items:center; gap:12px; }
+  .cal-head img { height:44px; width:auto; }
   .cal-box iframe { flex:1; width:100%; border:0; display:block; }
   .cal-empty { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; color:#444; }
   .cal-close { position:absolute; top:6px; right:14px; z-index:2; background:transparent; border:0; color:#fff; font-size:2rem; line-height:1; cursor:pointer; }
@@ -523,7 +524,7 @@ header.banner .banner-text p {
           </a>
           <ul class="submenu" id="tourSubmenu">
             <li class="bullet-VCTour"><a href="#virtual-tour" id="openTour">Virtual Campus Tour</a></li>
-            <li class="bullet-SVisit"><a href="schedule-visit.html" id="openVisit">Schedule a Visit</a></li>
+            <li class="bullet-SVisit"><a href="schedule-visit.html" data-popup>Schedule a Visit</a></li>
           </ul>
         </div>
 
@@ -533,8 +534,8 @@ header.banner .banner-text p {
             <span class="caret">&gt;</span>
           </a>
           <ul class="submenu" id="coursesSubmenu">
-            <li class="bullet-bscrim"><a href="#bs-criminology">BS Criminology</a></li>
-            <li class="bullet-bsma"><a href="#bs-management-accounting">BS Management Accounting</a></li>
+            <li class="bullet-bscrim"><a href="criminology.html" data-popup>BS Criminology</a></li>
+            <li class="bullet-bsma"><a href="management-accounting.html" data-popup>BS Management Accounting</a></li>
           </ul>
         </div>
 
@@ -544,8 +545,8 @@ header.banner .banner-text p {
             <span class="caret">&gt;</span>
           </a>
           <ul class="submenu" id="scholarshipsSubmenu">
-            <li class="bullet-AScholarships"><a href="#academic-scholarships">Academic Scholarships</a></li>
-            <li class="bullet-SADiscount"><a href="#sibling-alumni-discounts">Sibling &amp; Alumni Discounts</a></li>
+            <li class="bullet-AScholarships"><a href="academic-scholarships.html" data-popup>Academic Scholarships</a></li>
+            <li class="bullet-SADiscount"><a href="sibling-alumni-discounts.html" data-popup>Sibling &amp; Alumni Discounts</a></li>
           </ul>
         </div>
 
@@ -555,7 +556,7 @@ header.banner .banner-text p {
             <span class="caret">&gt;</span>
           </a>
           <ul class="submenu" id="newsSubmenu">
-            <li class="bullet-LAnnouncement"><a href="#latest-announcements">Latest Announcements</a></li>
+            <li class="bullet-LAnnouncement"><a href="announcements.html" data-popup>Latest Announcements</a></li>
             <li class="bullet-SchoolCalendar"><a href="#school-calendar" id="openCal">School Calendar</a></li>
           </ul>
         </div>
@@ -617,7 +618,7 @@ header.banner .banner-text p {
   <div class="cal-modal" id="calModal" aria-hidden="true">
     <div class="cal-box" role="dialog" aria-label="School Calendar">
       <button class="cal-close" id="calClose" aria-label="Close">&times;</button>
-      <div class="cal-head">Saint Louis College of Solano &ndash; School Calendar</div>
+      <div class="cal-head"><img src="logo/SchoolCalendar.png" alt="School Calendar icon"><span>Saint Louis College of Solano &ndash; School Calendar</span></div>
       <div id="calBody"></div>
     </div>
   </div>
@@ -773,7 +774,7 @@ var visitModal = document.getElementById('visitModal');
 var visitFrame = document.getElementById('visitFrame');
 function openVisit(e) {
   e.preventDefault();
-  visitFrame.src = 'schedule-visit.html';   // reloads a fresh form each time
+  visitFrame.src = e.currentTarget.getAttribute('href');   // loads the page for the clicked link
   visitModal.classList.add('show');
   visitModal.setAttribute('aria-hidden', 'false');
 }
@@ -782,7 +783,7 @@ function closeVisit() {
   visitModal.setAttribute('aria-hidden', 'true');
   visitFrame.src = 'about:blank';
 }
-document.getElementById('openVisit').addEventListener('click', openVisit);
+document.querySelectorAll('a[data-popup]').forEach(function (a) { a.addEventListener('click', openVisit); });
 document.getElementById('visitClose').addEventListener('click', closeVisit);
 visitModal.addEventListener('click', function (e) { if (e.target === visitModal) closeVisit(); });
 window.addEventListener('message', function (e) { if (e.data === 'closeScheduleVisit') closeVisit(); });
@@ -824,7 +825,7 @@ function openCal(e) {
   } else {
     var f = document.createElement('iframe');
     f.title = 'Saint Louis College of Solano Google Calendar';
-    f.style.height = 'calc(min(90vh, 720px) - 54px)';
+    f.style.height = 'calc(min(90vh, 720px) - 64px)';
     f.src = 'https://calendar.google.com/calendar/embed?src=' + encodeURIComponent(cleanCalId(CALENDAR_ID)) +
             '&ctz=' + encodeURIComponent(CALENDAR_TZ) + '&mode=MONTH&showTitle=0&showPrint=0&showTz=0';
     calBody.appendChild(f);
