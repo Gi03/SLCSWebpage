@@ -592,6 +592,24 @@ header.banner .banner-text p {
   .sch-btn { padding:8px 14px; border:0; border-radius:6px; background:#e6e9f0; color:#0d2456; font:bold 14px Arial,sans-serif; cursor:pointer; }
   .sch-btn.pri { background:var(--navy); color:#fff; }
   @media (max-width:560px) { .sch-row { grid-template-columns:1fr; } }
+  .vl-filters { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+  .vl-filters button { padding:6px 12px; border:1px solid #c9cfdc; border-radius:16px; background:#fff; color:#0d2456; font:bold 13px Arial,sans-serif; cursor:pointer; }
+  .vl-filters button.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .vl-day { margin:18px 0 8px; padding-bottom:4px; border-bottom:2px solid #d7dbe4; color:var(--navy); font-size:16px; font-weight:bold; }
+  .vl-day small { font-weight:normal; color:#556; margin-left:6px; }
+  .vl-sec { margin:22px 0 0; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#778; }
+  .vcard { display:grid; grid-template-columns:90px 1fr; gap:12px; border-left:5px solid #e0a000; background:#f4f6fb; border-radius:0 8px 8px 0; padding:10px 12px; margin-bottom:8px; font-size:14px; line-height:1.5; }
+  .vcard.Confirmed { border-left-color:#1b8a3a; } .vcard.Completed { border-left-color:#8a93a6; } .vcard.Cancelled { border-left-color:#b00020; opacity:.75; }
+  .vcard .vt { overflow-wrap:anywhere; font-weight:bold; font-size:15px; color:var(--navy); }
+  .vcard .vn { font-weight:bold; font-size:15px; }
+  .vcard .vm { color:#445; }
+  .vcard a { color:var(--navy); }
+  .vcard .vq { margin-top:4px; font-style:italic; color:#445; }
+  .vcard select { margin-top:6px; padding:5px 8px; border-radius:6px; border:1px solid #aab2c5; font:13px Arial,sans-serif; }
+  .vcard .vtop { display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer; }
+  .vcard .vb { font-size:12px; font-weight:bold; padding:2px 10px; border-radius:10px; background:#e8ecf6; color:#0d2456; white-space:nowrap; }
+  .vcard .vdet { margin-top:6px; padding-top:6px; border-top:1px solid #d7dbe4; }
+  @media (max-width:480px) { .vcard { grid-template-columns:1fr; gap:2px; } }
   .who { font-size:13px; margin-bottom:12px; color:#33415c; }
   .who a { color:var(--navy); text-decoration:underline; cursor:pointer; }
 </style>
@@ -1172,28 +1190,80 @@ $('vfForm').addEventListener('submit', function (e) {
 });
 
 /* staff/admin: view visit requests */
+var vlItems = [], vlFilter = 'All', VSTATUS = ['Pending', 'Confirmed', 'Completed', 'Cancelled'];
+function tmin(t) {
+  var m = /(\d+):(\d+)\s*(AM|PM)/i.exec(t || ''); if (!m) return 0;
+  return ((+m[1] % 12) + (/pm/i.test(m[3]) ? 12 : 0)) * 60 + (+m[2]);
+}
+function ymd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function dayLabel(str) {
+  var p = str.split('-'), d = new Date(+p[0], +p[1] - 1, +p[2]); if (isNaN(d)) return str;
+  var now = new Date(), tm = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), tag = '';
+  if (str === ymd(now)) tag = 'Today'; else if (str === ymd(tm)) tag = 'Tomorrow';
+  return { text: d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), tag: tag };
+}
+function vlCard(v, parent) {
+  ['id', 'name', 'email', 'phone', 'date', 'time', 'course', 'visitors', 'message', 'status'].forEach(function (k) { v[k] = String(v[k] == null ? '' : v[k]); });
+  var c = mk('div', null, 'vcard ' + v.status, parent);
+  var t = mk('div', v.time, 'vt', c), info = mk('div', null, null, c);
+  var top = mk('div', null, 'vtop', info);
+  mk('span', v.name, 'vn', top); mk('span', v.status, 'vb', top);
+  var det = mk('div', null, 'vdet', info); det.style.display = v._open ? 'block' : 'none';
+  var toggle = function () { v._open = !v._open; det.style.display = v._open ? 'block' : 'none'; };
+  top.onclick = toggle; t.onclick = toggle; t.style.cursor = 'pointer';
+  mk('div', v.visitors + ' visitor' + (+v.visitors === 1 ? '' : 's') + ' \u2022 Course: ' + (v.course || 'Not sure yet'), 'vm', det);
+  var ct = mk('div', null, 'vm', det), ph = v.phone;
+  if (ph) { var a = mk('a', ph, null, ct); a.href = 'tel:' + ph.replace(/[^\d+]/g, ''); mk('span', '  \u2022  ', null, ct); }
+  var e = mk('a', v.email, null, ct); e.href = 'mailto:' + v.email;
+  if (v.message) mk('div', '\u201C' + v.message + '\u201D', 'vq', det);
+  var sel = mk('select', null, null, det);
+  VSTATUS.forEach(function (st) { var o = mk('option', st, null, sel); o.selected = st === v.status; });
+  sel.onchange = function () {
+    var old = v.status; v.status = sel.value; vlRender();
+    api('visitStatus', { id: v.id, status: v.status }).catch(function (err) { alert(err.message); v.status = old; vlRender(); });
+  };
+}
+function vlGroup(list, box) {
+  var days = {}, order = [];
+  list.forEach(function (v) { if (!days[v.date]) { days[v.date] = []; order.push(v.date); } days[v.date].push(v); });
+  order.forEach(function (d) {
+    var l = dayLabel(d), h = mk('div', typeof l === 'string' ? l : l.text, 'vl-day', box);
+    if (l.tag) mk('small', '(' + l.tag + ')', null, h);
+    days[d].sort(function (a, b) { return tmin(a.time) - tmin(b.time); }).forEach(function (v) { vlCard(v, box); });
+  });
+}
+function vlRender() {
+  var box = $('vlList'); box.textContent = '';
+  if (!vlItems.length) { box.textContent = 'No visit requests yet.'; return; }
+  mk('p', 'Tap a request to see the details.', 'who', box);
+  var bar = mk('div', null, 'vl-filters', box);
+  ['All'].concat(VSTATUS).forEach(function (f) {
+    var n = vlItems.filter(function (v) { return f === 'All' || v.status === f; }).length;
+    var b = mk('button', f + ' (' + n + ')', f === vlFilter ? 'on' : '', bar); b.type = 'button';
+    b.onclick = function () { vlFilter = f; vlRender(); };
+  });
+  var list = vlItems.filter(function (v) { return vlFilter === 'All' || v.status === vlFilter; });
+  if (!list.length) { mk('p', 'No ' + vlFilter.toLowerCase() + ' requests.', null, box); return; }
+  var today = ymd(new Date());
+  var up = list.filter(function (v) { return v.date >= today; }).sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  var past = list.filter(function (v) { return v.date < today; }).sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+  if (up.length) { mk('div', 'Upcoming visits', 'vl-sec', box); vlGroup(up, box); }
+  if (past.length) { mk('div', 'Past visits', 'vl-sec', box); vlGroup(past, box); }
+}
+// Safety net: if the sheet sends a raw timestamp (2026-10-14T16:00:00.000Z), turn it into a plain date / time
+function fixIso(v, kind) {
+  v = String(v == null ? '' : v);
+  if (!/^\d{4}-\d\d-\d\dT.*Z$/.test(v)) return v;
+  var d = new Date(v); if (isNaN(d)) return v;
+  return kind === 'date' ? ymd(d)
+    : d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(/[\u202f\u00a0]/g, ' ');
+}
 function loadVisits() {
-  var box = $('vlList');
   api('visits').then(function (r) {
-    box.textContent = '';
-    if (!r.items.length) { box.textContent = 'No visit requests yet.'; return; }
-    r.items.forEach(function (v) {
-      var d = document.createElement('div'); d.className = 'vis';
-      var n = document.createElement('b'); n.textContent = v.name;
-      var l1 = document.createElement('div'); l1.textContent = v.date + ' \u2022 ' + v.time + ' \u2022 ' + v.visitors + ' visitor(s) \u2022 ' + (v.course || 'Not sure yet');
-      var l2 = document.createElement('div'); l2.textContent = v.email + (v.phone ? ' \u2022 ' + v.phone : '');
-      d.appendChild(n); d.appendChild(l1); d.appendChild(l2);
-      if (v.message) { var m = document.createElement('div'); m.textContent = '\u201C' + v.message + '\u201D'; d.appendChild(m); }
-      var sel = document.createElement('select');
-      ['Pending', 'Confirmed', 'Completed', 'Cancelled'].forEach(function (s) {
-        var o = document.createElement('option'); o.textContent = s; o.selected = s === v.status; sel.appendChild(o);
-      });
-      sel.onchange = function () {
-        api('visitStatus', { id: v.id, status: sel.value }).catch(function (err) { alert(err.message); loadVisits(); });
-      };
-      d.appendChild(sel); box.appendChild(d);
-    });
-  }).catch(function (err) { box.textContent = err.message; });
+    vlItems = r.items.map(function (v) { v.date = fixIso(v.date, 'date'); v.time = fixIso(v.time, 'time'); return v; });
+    vlRender();
+  })
+    .catch(function (err) { $('vlList').textContent = err.message; });
 }
 $('openVisits').addEventListener('click', function (e) {
   e.preventDefault(); $('vlList').textContent = 'Loading...'; openOv($('vlModal')); loadVisits();
