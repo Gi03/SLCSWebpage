@@ -543,6 +543,39 @@ header.banner .banner-text p {
   .cal-box iframe { flex:1; width:100%; border:0; display:block; }
   .cal-empty { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; color:#444; }
   .cal-close { position:absolute; top:6px; right:14px; z-index:2; background:transparent; border:0; color:#fff; font-size:2rem; line-height:1; cursor:pointer; }
+
+  /* ===== Login / Register / Announcements ===== */
+  .login-btn.is-in { opacity: 1; }
+  .ov { display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,.65); align-items:center; justify-content:center; padding:16px; }
+  .ov.show { display:flex; }
+  .ov-box { position:relative; width:100%; max-width:440px; max-height:90vh; overflow-y:auto; background:#fff; border-radius:10px; box-shadow:0 10px 40px rgba(0,0,0,.4); animation:fadeUp .3s ease-out; }
+  .ov-box.wide { max-width:680px; }
+  .ov-head { background:#16337a; color:#fff; padding:16px 52px 16px 22px; font-weight:bold; font-size:1.15rem; }
+  .ov-close { position:absolute; top:6px; right:12px; background:transparent; border:0; color:#fff; font-size:2rem; line-height:1; cursor:pointer; }
+  .ov-body { padding:20px 24px 24px; }
+  .tabs { display:flex; margin-bottom:14px; border-bottom:2px solid #d7dbe4; }
+  .tabs button { flex:1; padding:10px; border:0; background:none; font:bold 15px Arial,sans-serif; color:#33415c; cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; }
+  .tabs button.on { color:var(--navy); border-bottom-color:var(--navy); }
+  .ov-body label { display:block; font-size:13px; font-weight:bold; margin:12px 0 4px; }
+  .ov-body input, .ov-body textarea { width:100%; padding:10px 12px; border:1px solid #aab2c5; border-radius:6px; font:16px Arial,sans-serif; }
+  .ov-body textarea { min-height:100px; resize:vertical; }
+  .btn-main { margin-top:16px; width:100%; padding:12px; border:1px solid #0a1c47; border-radius:24px; background:linear-gradient(180deg,#2f56b3,var(--navy) 55%,var(--navy-dark)); color:#fff; font:bold 16px Arial,sans-serif; cursor:pointer; }
+  .btn-main:disabled { opacity:.6; cursor:wait; }
+  .msg { margin-top:12px; font-size:14px; min-height:18px; color:#b00020; }
+  .msg.ok { color:#1b6e2d; }
+  .ann { border-left:4px solid var(--navy); background:#f4f6fb; padding:12px 14px; margin:0 0 12px; border-radius:0 8px 8px 0; }
+  .ann h4 { margin:0 0 4px; font-size:17px; color:var(--navy); }
+  .ann .meta { font-size:12px; color:#556; margin-bottom:6px; }
+  .ann p { margin:0; white-space:pre-wrap; line-height:1.5; }
+  .ann .del { float:right; border:0; background:none; color:#b00020; cursor:pointer; font-size:13px; }
+  .ann-form { border:1px dashed #aab2c5; border-radius:8px; padding:4px 14px 14px; margin-bottom:18px; }
+  .vis { border-left:4px solid var(--navy); background:#f4f6fb; padding:12px 14px; margin:0 0 12px; border-radius:0 8px 8px 0; font-size:14px; line-height:1.5; }
+  .vis b { color:var(--navy); font-size:16px; }
+  .vis select { margin-top:6px; padding:6px; border-radius:6px; border:1px solid #aab2c5; font:14px Arial,sans-serif; }
+  .vis .st-Confirmed { color:#1b6e2d; } .vis .st-Cancelled { color:#b00020; }
+  .hp { position:absolute; left:-9999px; }
+  .who { font-size:13px; margin-bottom:12px; color:#33415c; }
+  .who a { color:var(--navy); text-decoration:underline; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -553,7 +586,7 @@ header.banner .banner-text p {
 			<h1>Saint Louis College of Solano, Inc.</h1>
 			<p>Pro Deo, Familia et Patria </p>
 			<p>Solano, Nueva Vizcaya</p>
-			<a href="#" class="login-btn">LOGIN</a>
+			<a href="#login" class="login-btn" id="loginBtn">LOGIN</a>
 		</div>
 		<img class="banner-photo" src="images/students.png" alt="Louisian students in their school uniforms">
 	</header>
@@ -570,7 +603,8 @@ header.banner .banner-text p {
           </a>
           <ul class="submenu" id="tourSubmenu">
             <li class="bullet-VCTour"><a href="#virtual-tour" id="openTour">Virtual Campus Tour</a></li>
-            <li class="bullet-SVisit"><a href="schedule-visit.html" data-popup>Schedule a Visit</a></li>
+            <li class="bullet-SVisit"><a href="#schedule-visit" id="openVisitForm">Schedule a Visit</a></li>
+            <li class="bullet-SVisit" id="visitsLi" style="display:none"><a href="#visit-requests" id="openVisits">View Visit Requests</a></li>
           </ul>
         </div>
 
@@ -594,7 +628,7 @@ header.banner .banner-text p {
             <span class="caret">&gt;</span>
           </a>
           <ul class="submenu" id="scholarshipsSubmenu">
-            <li class="bullet-AScholarships"><a href="academic-scholarships.html" data-popup>Scholarships &amp; Discounts</a></li>
+            <li class="bullet-AScholarships"><a href="scholarships-discounts.html" data-popup>Scholarships &amp; Discounts</a></li>
             <li class="bullet-SADiscount"><a href="sibling-alumni-discounts.html" data-popup>Sibling &amp; Alumni Discounts</a></li>
           </ul>
         </div>
@@ -605,7 +639,7 @@ header.banner .banner-text p {
             <span class="caret">&gt;</span>
           </a>
           <ul class="submenu" id="newsSubmenu">
-            <li class="bullet-LAnnouncement"><a href="announcements.html" data-popup>Latest Announcements</a></li>
+            <li class="bullet-LAnnouncement"><a href="#announcements" id="openAnn">Latest Announcements</a></li>
             <li class="bullet-SchoolCalendar"><a href="#school-calendar" id="openCal">School Calendar</a></li>
           </ul>
         </div>
@@ -651,6 +685,80 @@ header.banner .banner-text p {
 
   <div class="copyright">
     &copy; <span id="year">2026</span> Saint Louis College of Solano, Inc. All rights reserved.
+  </div>
+
+
+  <div class="ov" id="authModal" aria-hidden="true">
+    <div class="ov-box" role="dialog" aria-label="Login or Register">
+      <button class="ov-close" data-close aria-label="Close">&times;</button>
+      <div class="ov-head">Saint Louis College of Solano</div>
+      <div class="ov-body">
+        <div class="tabs"><button type="button" id="tabLogin" class="on">Login</button><button type="button" id="tabReg">Register</button></div>
+        <form id="authForm" autocomplete="on">
+          <div id="nameRow" style="display:none"><label for="aName">Full name</label><input id="aName" autocomplete="name" maxlength="80"></div>
+          <label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="email" required>
+          <label for="aPass">Password <span id="passHint" style="font-weight:normal"></span></label><input id="aPass" type="password" autocomplete="current-password" required>
+          <button class="btn-main" id="authGo" type="submit">Login</button>
+          <div class="msg" id="authMsg" role="alert"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="ov" id="annModal" aria-hidden="true">
+    <div class="ov-box wide" role="dialog" aria-label="Latest Announcements">
+      <button class="ov-close" data-close aria-label="Close">&times;</button>
+      <div class="ov-head">Latest Announcements</div>
+      <div class="ov-body">
+        <div class="who" id="annWho"></div>
+        <form class="ann-form" id="annForm" style="display:none">
+          <label for="annTitle">Title</label><input id="annTitle" maxlength="120" required>
+          <label for="annText">Message</label><textarea id="annText" maxlength="2000" required></textarea>
+          <button class="btn-main" type="submit">Post Announcement</button>
+          <div class="msg" id="annMsg" role="alert"></div>
+        </form>
+        <div id="annList">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="ov" id="vfModal" aria-hidden="true">
+    <div class="ov-box" role="dialog" aria-label="Schedule a Visit">
+      <button class="ov-close" data-close aria-label="Close">&times;</button>
+      <div class="ov-head">Schedule a Visit</div>
+      <div class="ov-body">
+        <form id="vfForm">
+          <label for="vName">Full name</label><input id="vName" maxlength="80" autocomplete="name" required>
+          <label for="vEmail">Email</label><input id="vEmail" type="email" autocomplete="email" required>
+          <label for="vPhone">Contact number</label><input id="vPhone" type="tel" maxlength="30" autocomplete="tel" required>
+          <label for="vDate">Preferred date</label><input id="vDate" type="date" required>
+          <label for="vTime">Preferred time</label>
+          <select id="vTime" required style="width:100%;padding:10px 12px;border:1px solid #aab2c5;border-radius:6px;font:16px Arial,sans-serif;background:#fff">
+            <option value="">Select a time</option>
+            <option>8:00 AM</option><option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option>
+            <option>1:00 PM</option><option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option>
+          </select>
+          <label for="vCourse">Course of interest</label>
+          <select id="vCourse" style="width:100%;padding:10px 12px;border:1px solid #aab2c5;border-radius:6px;font:16px Arial,sans-serif;background:#fff">
+            <option value="">Not sure yet</option><option>BS Criminology</option><option>BS Management Accounting</option>
+          </select>
+          <label for="vCount">Number of visitors</label><input id="vCount" type="number" min="1" max="20" value="1" required>
+          <label for="vMsg">Message (optional)</label><textarea id="vMsg" maxlength="1000" style="min-height:70px"></textarea>
+          <input class="hp" id="vWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="btn-main" type="submit">Submit Request</button>
+          <div class="msg" id="vMsgOut" role="alert"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="ov" id="vlModal" aria-hidden="true">
+    <div class="ov-box wide" role="dialog" aria-label="Visit Requests">
+      <button class="ov-close" data-close aria-label="Close">&times;</button>
+      <div class="ov-head">Visit Requests</div>
+      <div class="ov-body"><div id="vlList">Loading...</div></div>
+    </div>
   </div>
 
   <div class="tour-modal" id="tourModal" aria-hidden="true">
@@ -891,6 +999,184 @@ document.getElementById('openCal').addEventListener('click', openCal);
 document.getElementById('calClose').addEventListener('click', closeCal);
 calModal.addEventListener('click', function (e) { if (e.target === calModal) closeCal(); });
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && calModal.classList.contains('show')) closeCal(); });
+
+/* ===== Accounts & Announcements (Google Sheet backend) ===== */
+// Paste the Web app URL you get after deploying Code.gs (ends with /exec)
+var API_URL = 'https://script.google.com/macros/s/AKfycbwP58F4g_Nm1oqNYTbCptXP5_kpbsgfJoXFk31nPgyv4f6wJDNGzCTZL7cofmG1C92t/exec';
+
+var auth = { token: null, user: null };
+try { auth.token = localStorage.getItem('slcs_token'); } catch (e) {}
+var $ = function (id) { return document.getElementById(id); };
+
+function api(action, data) {
+  if (API_URL.indexOf('PASTE_') === 0) return Promise.reject(new Error('The database is not connected yet.'));
+  var body = Object.assign({ action: action, token: auth.token }, data || {});
+  return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+    .then(function (r) { return r.json(); })
+    .then(function (r) { if (!r.ok) throw new Error(r.error || 'Something went wrong.'); return r; });
+}
+function openOv(m) { m.classList.add('show'); m.setAttribute('aria-hidden', 'false'); }
+function closeOv(m) { m.classList.remove('show'); m.setAttribute('aria-hidden', 'true'); }
+document.querySelectorAll('.ov').forEach(function (m) {
+  m.addEventListener('click', function (e) { if (e.target === m || e.target.hasAttribute('data-close')) closeOv(m); });
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') document.querySelectorAll('.ov.show').forEach(closeOv);
+});
+
+function setSession(token, user) {
+  auth.token = token; auth.user = user;
+  try { token ? localStorage.setItem('slcs_token', token) : localStorage.removeItem('slcs_token'); } catch (e) {}
+  var b = $('loginBtn');
+  b.textContent = user ? 'LOGOUT' : 'LOGIN';
+  b.classList.toggle('is-in', !!user);
+  b.title = user ? 'Logged in as ' + user.name : '';
+  $('visitsLi').style.display = user && user.canPost ? '' : 'none';
+}
+if (auth.token) {
+  api('me').then(function (r) { setSession(auth.token, r.user); }).catch(function () { setSession(null, null); });
+}
+
+/* login / register pop-up */
+var regMode = false;
+function setMode(reg) {
+  regMode = reg;
+  $('tabLogin').classList.toggle('on', !reg); $('tabReg').classList.toggle('on', reg);
+  $('nameRow').style.display = reg ? 'block' : 'none';
+  $('aPass').autocomplete = reg ? 'new-password' : 'current-password';
+  $('passHint').textContent = reg ? '(at least 8 characters)' : '';
+  $('authGo').textContent = reg ? 'Create Account' : 'Login';
+  $('authMsg').textContent = '';
+}
+$('tabLogin').onclick = function () { setMode(false); };
+$('tabReg').onclick = function () { setMode(true); };
+
+$('loginBtn').addEventListener('click', function (e) {
+  e.preventDefault();
+  if (auth.user) {
+    var t = auth.token;
+    setSession(null, null);
+    api('logout', { token: t }).catch(function () {});
+    return;
+  }
+  setMode(false); openOv($('authModal')); $('aEmail').focus();
+});
+
+$('authForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var go = $('authGo'), msg = $('authMsg');
+  go.disabled = true; msg.className = 'msg'; msg.textContent = 'Please wait...';
+  api(regMode ? 'register' : 'login', { name: $('aName').value, email: $('aEmail').value, password: $('aPass').value })
+    .then(function (r) {
+      setSession(r.token, r.user);
+      $('aPass').value = '';
+      closeOv($('authModal'));
+    })
+    .catch(function (err) { msg.textContent = err.message === 'Failed to fetch' ? 'Cannot reach the server.' : err.message; })
+    .then(function () { go.disabled = false; });
+});
+
+/* announcements pop-up */
+function renderAnn(items) {
+  var box = $('annList'); box.textContent = '';
+  if (!items.length) { box.textContent = 'No announcements yet.'; return; }
+  items.forEach(function (a) {
+    var d = document.createElement('div'); d.className = 'ann';
+    if (a.mine) {
+      var x = document.createElement('button'); x.className = 'del'; x.textContent = 'Delete';
+      x.onclick = function () {
+        if (!confirm('Delete this announcement?')) return;
+        api('delete', { id: a.id }).then(loadAnn).catch(function (err) { alert(err.message); });
+      };
+      d.appendChild(x);
+    }
+    var h = document.createElement('h4'); h.textContent = a.title;
+    var m = document.createElement('div'); m.className = 'meta';
+    m.textContent = a.author + ' \u2022 ' + new Date(a.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    var p = document.createElement('p'); p.textContent = a.body;
+    d.appendChild(h); d.appendChild(m); d.appendChild(p); box.appendChild(d);
+  });
+}
+function loadAnn() {
+  api('list').then(function (r) {
+    renderAnn(r.items);
+    var who = $('annWho'); who.textContent = '';
+    $('annForm').style.display = auth.user && auth.user.canPost ? 'block' : 'none';
+    if (!auth.user) {
+      who.appendChild(document.createTextNode('Staff can post announcements after logging in. '));
+      var a = document.createElement('a'); a.textContent = 'Login / Register';
+      a.onclick = function () { closeOv($('annModal')); $('loginBtn').click(); };
+      who.appendChild(a);
+    } else if (!auth.user.canPost) {
+      who.textContent = 'Logged in as ' + auth.user.name + '. Your account can read announcements only.';
+    } else {
+      who.textContent = 'Logged in as ' + auth.user.name + ' (' + auth.user.role + ')';
+    }
+  }).catch(function (err) { $('annList').textContent = err.message; });
+}
+$('openAnn').addEventListener('click', function (e) {
+  e.preventDefault(); $('annList').textContent = 'Loading...'; openOv($('annModal')); loadAnn();
+});
+$('annForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var msg = $('annMsg'), btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Posting...';
+  api('add', { title: $('annTitle').value, body: $('annText').value })
+    .then(function () { $('annTitle').value = ''; $('annText').value = ''; msg.className = 'msg ok'; msg.textContent = 'Posted!'; loadAnn(); })
+    .catch(function (err) { msg.textContent = err.message; })
+    .then(function () { btn.disabled = false; });
+});
+
+/* ===== Schedule a Visit (saved to the Visits tab) ===== */
+$('openVisitForm').addEventListener('click', function (e) {
+  e.preventDefault();
+  var d = $('vDate'), t = new Date();
+  d.min = t.getFullYear() + '-' + ('0' + (t.getMonth() + 1)).slice(-2) + '-' + ('0' + t.getDate()).slice(-2);
+  if (auth.user && !$('vName').value) { $('vName').value = auth.user.name; $('vEmail').value = auth.user.email; }
+  $('vMsgOut').textContent = '';
+  openOv($('vfModal'));
+});
+$('vfForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var msg = $('vMsgOut'), btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Sending...';
+  api('visit', { name: $('vName').value, email: $('vEmail').value, phone: $('vPhone').value, date: $('vDate').value,
+                 time: $('vTime').value, course: $('vCourse').value, visitors: $('vCount').value, message: $('vMsg').value, website: $('vWeb').value })
+    .then(function () {
+      msg.className = 'msg ok'; msg.textContent = 'Thank you! Your visit request was sent. We will contact you to confirm.';
+      $('vDate').value = ''; $('vMsg').value = '';
+    })
+    .catch(function (err) { msg.textContent = err.message; })
+    .then(function () { btn.disabled = false; });
+});
+
+/* staff/admin: view visit requests */
+function loadVisits() {
+  var box = $('vlList');
+  api('visits').then(function (r) {
+    box.textContent = '';
+    if (!r.items.length) { box.textContent = 'No visit requests yet.'; return; }
+    r.items.forEach(function (v) {
+      var d = document.createElement('div'); d.className = 'vis';
+      var n = document.createElement('b'); n.textContent = v.name;
+      var l1 = document.createElement('div'); l1.textContent = v.date + ' \u2022 ' + v.time + ' \u2022 ' + v.visitors + ' visitor(s) \u2022 ' + (v.course || 'Not sure yet');
+      var l2 = document.createElement('div'); l2.textContent = v.email + (v.phone ? ' \u2022 ' + v.phone : '');
+      d.appendChild(n); d.appendChild(l1); d.appendChild(l2);
+      if (v.message) { var m = document.createElement('div'); m.textContent = '\u201C' + v.message + '\u201D'; d.appendChild(m); }
+      var sel = document.createElement('select');
+      ['Pending', 'Confirmed', 'Completed', 'Cancelled'].forEach(function (s) {
+        var o = document.createElement('option'); o.textContent = s; o.selected = s === v.status; sel.appendChild(o);
+      });
+      sel.onchange = function () {
+        api('visitStatus', { id: v.id, status: sel.value }).catch(function (err) { alert(err.message); loadVisits(); });
+      };
+      d.appendChild(sel); box.appendChild(d);
+    });
+  }).catch(function (err) { box.textContent = err.message; });
+}
+$('openVisits').addEventListener('click', function (e) {
+  e.preventDefault(); $('vlList').textContent = 'Loading...'; openOv($('vlModal')); loadVisits();
+});
 </script>
 
 </body>
