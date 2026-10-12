@@ -650,11 +650,11 @@ header.banner .banner-text p {
             <span class="caret">&gt;</span>
           </a>
           <ul class="submenu" id="coursesSubmenu">
-            <li class="bullet-basiced"><a href="basic-education.html" data-popup>Basic Education</a></li>
-            <li class="bullet-highschool"><a href="high-school.html" data-popup>High School</a></li>
-            <li class="bullet-seniorhigh"><a href="senior-high.html" data-popup>Senior High &amp; Strands</a></li>
-            <li class="bullet-bscrim"><a href="criminology.html" data-popup>BS Criminology</a></li>
-            <li class="bullet-bsma"><a href="management-accounting.html" data-popup>BS Management Accounting</a></li>
+            <li class="bullet-basiced"><a href="#basic-education" data-pg="basic">Basic Education</a></li>
+            <li class="bullet-highschool"><a href="#high-school" data-pg="highschool">High School</a></li>
+            <li class="bullet-seniorhigh"><a href="#senior-high" data-pg="seniorhigh">Senior High &amp; Strands</a></li>
+            <li class="bullet-bscrim"><a href="#criminology" data-pg="criminology">BS Criminology</a></li>
+            <li class="bullet-bsma"><a href="#management-accounting" data-pg="accounting">BS Management Accounting</a></li>
           </ul>
         </div>
 
@@ -797,6 +797,14 @@ header.banner .banner-text p {
         <div class="tabs"><button type="button" id="schTabS" class="on">Academic Scholarships</button><button type="button" id="schTabD">Sibling &amp; Alumni Discounts</button></div>
         <div class="sch" id="schBody">Loading...</div>
       </div>
+    </div>
+  </div>
+
+  <div class="ov" id="pgModal" aria-hidden="true">
+    <div class="ov-box wide" role="dialog" aria-label="Course information">
+      <button class="ov-close" data-close aria-label="Close">&times;</button>
+      <div class="ov-head ic"><img id="pgIcon" src="" alt=""><div><div id="pgTitleH"></div><p>Saint Louis College of Solano, Inc.</p></div></div>
+      <div class="ov-body"><div class="sch" id="pgBody">Loading...</div></div>
     </div>
   </div>
 
@@ -1041,7 +1049,7 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ca
 
 /* ===== Accounts & Announcements (Google Sheet backend) ===== */
 // Paste the Web app URL you get after deploying Code.gs (ends with /exec)
-var API_URL = 'https://script.google.com/macros/s/AKfycbwFNhNtapFyZyb0TUnHFhxDbI4Q3ji1D5XhXI-5x_mRVm4JSMF-jdyfqfYkDMQj1Vf2/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwxR0I35ejPlxlTJARz2u7qfrPFBpGyQKVDibgj0OQePNY5gLHxSd4m_Dwr-h5APsuy/exec';
 
 var auth = { token: null, user: null };
 try { auth.token = localStorage.getItem('slcs_token'); } catch (e) {}
@@ -1287,6 +1295,7 @@ function mk(tag, text, cls, parent) {
   var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls;
   if (parent) parent.appendChild(e); return e;
 }
+function isAdmin() { return !!(auth.user && auth.user.role === 'admin'); }
 function isStaff() { return !!(auth.user && auth.user.canPost); }
 function schPage(k) { return schData[k] || SCH[k].def; }
 
@@ -1365,6 +1374,106 @@ $('schTabD').onclick = function () { schKey = 'discount'; schEditing = false; sc
 $('openSch').addEventListener('click', function (e) {
   e.preventDefault(); schEditing = false; schKey = 'scholarship';
   $('schBody').textContent = 'Loading...'; openOv($('schModal')); loadSch();
+});
+
+/* ===== Courses & Offerings pages (editable by admin/staff, stored in the sheet) ===== */
+var PG = {
+  basic: { title: 'Basic Education', icon: 'images/basic_education.svg' },
+  highschool: { title: 'High School', icon: 'images/high_school.svg' },
+  seniorhigh: { title: 'Senior High & Strands', icon: 'images/senior_high.svg' },
+  criminology: { title: 'BS Criminology', icon: 'images/bscrim_logo.png' },
+  accounting: { title: 'BS Management Accounting', icon: 'images/bsma_logo.png' }
+};
+var pgData = {}, pgKey = 'basic', pgEditing = false;
+function pgDef(k) {
+  var secs = [];
+  if (k === 'seniorhigh') secs.push({ h: 'Available Strands', kind: 'table', body: 'Strand | Description\n[Strand name] | [Short description]' });
+  secs.push({ h: 'Requirements', kind: 'list', body: '[Admission requirements]' });
+  secs.push({ h: 'How to Enroll', kind: 'text', body: '[Where and when to enroll]' });
+  return { overview: '[Describe this program]', sections: secs };
+}
+function lines(t) { return String(t || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean); }
+
+function pgRender() {
+  var cfg = PG[pgKey], p = pgData[pgKey] || pgDef(pgKey), staff = isAdmin(), box = $('pgBody');
+  $('pgIcon').src = cfg.icon; $('pgTitleH').textContent = cfg.title; box.textContent = '';
+  if (staff && pgEditing) { pgRenderEdit(box, p); return; }
+  var ok = function (t) { return staff || !PH.test(String(t).trim()); }, shown = 0;
+  if (staff) {
+    var bar = mk('div', null, null, box); bar.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px';
+    mk('span', 'Yellow text still needs to be filled in.', 'who', bar).style.margin = '0';
+    mk('button', 'Edit this page', 'sch-btn pri', bar).onclick = function () { pgEditing = true; pgRender(); };
+  }
+  var ov = String(p.overview || '').trim();
+  if (ov && ok(ov)) { mk('h2', 'Overview', null, box); mk('p', ov, staff && PH.test(ov) ? 'fill' : '', box); shown++; }
+  (p.sections || []).forEach(function (sec) {
+    var ls = lines(sec.body), h = sec.h || '';
+    if (sec.kind === 'table') {
+      var rows = ls.slice(1).map(function (l) { return l.split('|').map(function (x) { return x.trim(); }); }).filter(function (r) { return ok(r[0]); });
+      if (!rows.length) return;
+      mk('h2', h, null, box); var w = mk('div', null, 'tbl', box), t = mk('table', null, null, w), hr = mk('tr', null, null, t);
+      ls[0].split('|').forEach(function (x) { mk('th', x.trim(), null, hr); });
+      rows.forEach(function (r) {
+        var tr = mk('tr', null, null, t);
+        for (var i = 0; i < hr.children.length; i++) { var v = r[i] || '', ph = PH.test(v); mk('td', !staff && ph ? 'To be announced' : v, staff && ph ? 'fill' : '', tr); }
+      });
+      shown++; return;
+    }
+    ls = ls.filter(ok); if (!ls.length) return;
+    if (h) mk('h2', h, null, box);
+    if (sec.kind === 'list') { var ul = mk('ul', null, null, box); ls.forEach(function (x) { mk('li', x, staff && PH.test(x) ? 'fill' : '', ul); }); }
+    else ls.forEach(function (x) { mk('p', x, staff && PH.test(x) ? 'fill' : '', box); });
+    shown++;
+  });
+  if (!shown) mk('p', 'Details will be posted soon. Please contact the school office.', null, box);
+  mk('p', 'For requirements, schedules and the latest details, please contact the school at 0947 502 2362 or saintlouiscollegeofsolano@gmail.com.', 'note', box);
+}
+
+function pgRenderEdit(box, p) {
+  mk('div', 'Editing: ' + PG[pgKey].title, 'who', box);
+  mk('label', 'Overview', null, box); var ov = mk('textarea', null, null, box); ov.value = p.overview || '';
+  mk('label', 'Sections (e.g. Requirements, Subjects, Tuition, How to Enroll)', null, box);
+  var list = mk('div', null, null, box);
+  var addSec = function (sec) {
+    var b = mk('div', null, 'ann-form', list); b.style.padding = '8px 14px 12px';
+    var top = mk('div', null, null, b); top.style.cssText = 'display:flex;gap:6px;margin-top:8px';
+    b._h = mk('input', null, null, top); b._h.placeholder = 'Section title'; b._h.maxLength = 100; b._h.value = sec.h || '';
+    b._k = mk('select', null, null, top); b._k.style.cssText = 'width:auto;padding:8px;border:1px solid #aab2c5;border-radius:6px';
+    [['text', 'Paragraph'], ['list', 'Bullet list'], ['table', 'Table']].forEach(function (o) { var op = mk('option', o[1], null, b._k); op.value = o[0]; });
+    b._k.value = sec.kind || 'text';
+    b._b = mk('textarea', null, null, b); b._b.style.minHeight = '90px'; b._b.value = sec.body || ''; b._b.maxLength = 4000;
+    var hint = mk('div', null, 'who', b), setHint = function () {
+      hint.textContent = b._k.value === 'table' ? 'First line = column titles. One row per line, columns separated by |  (example: Strand | Description)'
+        : b._k.value === 'list' ? 'One item per line.' : 'One paragraph per line.';
+    };
+    b._k.onchange = setHint; setHint();
+    var acts = mk('div', null, null, b); acts.style.cssText = 'display:flex;gap:6px';
+    mk('button', '\u25B2', 'sch-btn', acts).onclick = function (e) { e.preventDefault(); if (b.previousSibling) list.insertBefore(b, b.previousSibling); };
+    mk('button', '\u25BC', 'sch-btn', acts).onclick = function (e) { e.preventDefault(); if (b.nextSibling) list.insertBefore(b.nextSibling, b); };
+    mk('button', 'Remove section', 'sch-btn', acts).onclick = function (e) { e.preventDefault(); b.remove(); };
+  };
+  (p.sections || []).forEach(addSec);
+  var add = mk('button', '+ Add section', 'sch-btn', box); add.onclick = function () { addSec({ kind: 'text' }); };
+  var msg = mk('div', null, 'msg', box), acts2 = mk('div', null, null, box); acts2.style.cssText = 'display:flex;gap:10px;margin-top:14px';
+  var save = mk('button', 'Save', 'sch-btn pri', acts2), cancel = mk('button', 'Cancel', 'sch-btn', acts2);
+  cancel.onclick = function () { pgEditing = false; pgRender(); };
+  save.onclick = function () {
+    var secs = [].map.call(list.children, function (b) { return { h: b._h.value, kind: b._k.value, body: b._b.value }; });
+    save.disabled = true; msg.className = 'msg'; msg.textContent = 'Saving...';
+    api('pgSave', { key: pgKey, overview: ov.value, sections: secs })
+      .then(function () { pgEditing = false; return loadPg(); })
+      .catch(function (err) { msg.textContent = err.message; save.disabled = false; });
+  };
+}
+function loadPg() {
+  return api('pg').then(function (r) { pgData = r.pages || {}; pgRender(); })
+    .catch(function (err) { $('pgBody').textContent = err.message; });
+}
+document.querySelectorAll('a[data-pg]').forEach(function (a) {
+  a.addEventListener('click', function (e) {
+    e.preventDefault(); pgKey = a.getAttribute('data-pg'); pgEditing = false;
+    $('pgBody').textContent = 'Loading...'; openOv($('pgModal')); loadPg();
+  });
 });
 </script>
 
