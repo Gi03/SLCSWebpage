@@ -574,6 +574,24 @@ header.banner .banner-text p {
   .vis select { margin-top:6px; padding:6px; border-radius:6px; border:1px solid #aab2c5; font:14px Arial,sans-serif; }
   .vis .st-Confirmed { color:#1b6e2d; } .vis .st-Cancelled { color:#b00020; }
   .hp { position:absolute; left:-9999px; }
+  .ov-head.ic { display:flex; align-items:center; gap:14px; }
+  .ov-head.ic img { height:56px; width:auto; flex:none; }
+  .ov-head.ic p { margin:4px 0 0; font-size:.85rem; opacity:.85; font-weight:normal; }
+  .sch { line-height:1.6; }
+  .sch h2 { color:var(--navy); font-size:1.05rem; margin:18px 0 6px; }
+  .sch h2:first-child { margin-top:0; }
+  .sch p { margin:0 0 8px; }
+  .sch ul { margin:0 0 8px; padding-left:20px; }
+  .sch table { width:100%; border-collapse:collapse; margin:6px 0 10px; font-size:.92rem; }
+  .sch th, .sch td { border:1px solid #c9cfdc; padding:8px 10px; text-align:left; vertical-align:top; }
+  .sch th { background:#e8ecf6; color:#0d2456; }
+  .sch .fill { background:#fff7d6; }
+  .sch .note { font-size:.82rem; color:#555; margin-top:14px; }
+  .sch .tbl { overflow-x:auto; }
+  .sch-row { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:6px; margin-bottom:6px; }
+  .sch-btn { padding:8px 14px; border:0; border-radius:6px; background:#e6e9f0; color:#0d2456; font:bold 14px Arial,sans-serif; cursor:pointer; }
+  .sch-btn.pri { background:var(--navy); color:#fff; }
+  @media (max-width:560px) { .sch-row { grid-template-columns:1fr; } }
   .who { font-size:13px; margin-bottom:12px; color:#33415c; }
   .who a { color:var(--navy); text-decoration:underline; cursor:pointer; }
 </style>
@@ -622,16 +640,7 @@ header.banner .banner-text p {
           </ul>
         </div>
 
-        <div class="has-submenu" id="scholarshipsMenu">
-          <a class="nav-link toggle" href="#scholarships" id="scholarshipsToggle" aria-expanded="false" aria-controls="scholarshipsSubmenu">
-            <span>Scholarships &amp; Discounts</span>
-            <span class="caret">&gt;</span>
-          </a>
-          <ul class="submenu" id="scholarshipsSubmenu">
-            <li class="bullet-AScholarships"><a href="academic-scholarships.html" data-popup>Scholarships &amp; Discounts</a></li>
-            <li class="bullet-SADiscount"><a href="sibling-alumni-discounts.html" data-popup>Sibling &amp; Alumni Discounts</a></li>
-          </ul>
-        </div>
+        <a class="nav-link" href="#scholarships-discounts" id="openSch">Scholarships &amp; Discounts</a>
 
         <div class="has-submenu" id="newsMenu">
           <a class="nav-link toggle" href="#news" id="newsToggle" aria-expanded="false" aria-controls="newsSubmenu">
@@ -761,6 +770,18 @@ header.banner .banner-text p {
     </div>
   </div>
 
+
+  <div class="ov" id="schModal" aria-hidden="true">
+    <div class="ov-box wide" role="dialog" aria-label="Scholarships and Discounts">
+      <button class="ov-close" data-close aria-label="Close">&times;</button>
+      <div class="ov-head ic"><img id="schIcon" src="logo/AcademicScholarship.png" alt=""><div><div id="schTitleH">Academic Scholarships</div><p>Saint Louis College of Solano, Inc.</p></div></div>
+      <div class="ov-body">
+        <div class="tabs"><button type="button" id="schTabS" class="on">Academic Scholarships</button><button type="button" id="schTabD">Sibling &amp; Alumni Discounts</button></div>
+        <div class="sch" id="schBody">Loading...</div>
+      </div>
+    </div>
+  </div>
+
   <div class="tour-modal" id="tourModal" aria-hidden="true">
     <div class="tour-box" role="dialog" aria-label="Virtual Campus Tour">
       <button class="tour-close" id="tourClose" aria-label="Close">&times;</button>
@@ -805,7 +826,7 @@ header.banner .banner-text p {
 
   <script>
   (function () {
-    var menuIds = ['tourMenu', 'coursesMenu', 'scholarshipsMenu', 'newsMenu'];
+    var menuIds = ['tourMenu', 'coursesMenu', 'newsMenu'];
 
     menuIds.forEach(function (menuId) {
       var menu = document.getElementById(menuId);
@@ -1002,7 +1023,7 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ca
 
 /* ===== Accounts & Announcements (Google Sheet backend) ===== */
 // Paste the Web app URL you get after deploying Code.gs (ends with /exec)
-var API_URL = 'https://script.google.com/macros/s/AKfycbwP58F4g_Nm1oqNYTbCptXP5_kpbsgfJoXFk31nPgyv4f6wJDNGzCTZL7cofmG1C92t/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwFNhNtapFyZyb0TUnHFhxDbI4Q3ji1D5XhXI-5x_mRVm4JSMF-jdyfqfYkDMQj1Vf2/exec';
 
 var auth = { token: null, user: null };
 try { auth.token = localStorage.getItem('slcs_token'); } catch (e) {}
@@ -1176,6 +1197,104 @@ function loadVisits() {
 }
 $('openVisits').addEventListener('click', function (e) {
   e.preventDefault(); $('vlList').textContent = 'Loading...'; openOv($('vlModal')); loadVisits();
+});
+
+/* ===== Scholarships & Discounts pages (editable by admin/staff, stored in the sheet) ===== */
+var SCH = {
+  scholarship: { title: 'Academic Scholarships', icon: 'logo/AcademicScholarship.png', tableH: 'Scholarship Grants',
+    cols: ['Scholarship', 'Qualification', 'Benefit'], howH: 'How to Apply',
+    def: { overview: 'Saint Louis College of Solano recognizes students who excel academically. Scholarship grants help deserving students continue their education.',
+      rows: [['TanYanKee Scholarship', '1st Year College', 'Visit the School'], ['[Scholarship name]', '[Required grade / ranking]', '[Discount or grant]'], ['[Scholarship name]', '[Required grade / ranking]', '[Discount or grant]']],
+      reqs: '[Report card / Form 138]\n[Certificate of good moral character]\n[Other requirements]', how: '[Where and when to submit the application]' } },
+  discount: { title: 'Sibling & Alumni Discounts', icon: 'logo/AcademicDiscount.png', tableH: 'Available Discounts',
+    cols: ['Discount', 'Who Qualifies', 'Benefit'], howH: 'How to Avail',
+    def: { overview: 'Saint Louis College of Solano offers discounts to families and alumni who are part of the Saint Louis community.',
+      rows: [['Sibling Discount', '[Conditions, e.g. number of siblings enrolled]', '[Discount]'], ['Alumni Discount', '[Conditions, e.g. child or relative of an alumnus]', '[Discount]']],
+      reqs: '[Proof of relationship / alumni record]\n[Other requirements]', how: '[Where and when to apply]' } }
+};
+var schData = {}, schKey = 'scholarship', schEditing = false, PH = /^\[.*\]$/;
+function mk(tag, text, cls, parent) {
+  var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls;
+  if (parent) parent.appendChild(e); return e;
+}
+function isStaff() { return !!(auth.user && auth.user.canPost); }
+function schPage(k) { return schData[k] || SCH[k].def; }
+
+function schRender() {
+  var cfg = SCH[schKey], p = schPage(schKey), staff = isStaff(), box = $('schBody');
+  $('schIcon').src = cfg.icon; $('schTitleH').textContent = cfg.title;
+  $('schTabS').classList.toggle('on', schKey === 'scholarship'); $('schTabD').classList.toggle('on', schKey === 'discount');
+  box.textContent = '';
+  if (staff && schEditing) { schRenderEdit(box, cfg, p); return; }
+
+  var show = function (t) { return staff || !PH.test(String(t).trim()); };
+  if (staff) {
+    var bar = mk('div', null, null, box); bar.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px';
+    mk('span', 'Yellow text still needs to be filled in.', 'who', bar).style.margin = '0';
+    var eb = mk('button', 'Edit this page', 'sch-btn pri', bar); eb.onclick = function () { schEditing = true; schRender(); };
+  }
+  mk('h2', 'Overview', null, box); mk('p', p.overview, null, box);
+
+  var rows = (p.rows || []).filter(function (r) { return show(r[0]); });
+  if (rows.length) {
+    mk('h2', cfg.tableH, null, box);
+    var w = mk('div', null, 'tbl', box), t = mk('table', null, null, w), hr = mk('tr', null, null, t);
+    cfg.cols.forEach(function (h) { mk('th', h, null, hr); });
+    rows.forEach(function (r) {
+      var tr = mk('tr', null, null, t);
+      for (var i = 0; i < 3; i++) {
+        var v = r[i] || '', ph = PH.test(v.trim());
+        mk('td', !staff && ph ? 'To be announced' : v, staff && ph ? 'fill' : '', tr);
+      }
+    });
+  }
+  var reqs = String(p.reqs || '').split('\n').map(function (x) { return x.trim(); }).filter(function (x) { return x && show(x); });
+  if (reqs.length) {
+    mk('h2', 'Requirements', null, box); var ul = mk('ul', null, null, box);
+    reqs.forEach(function (x) { mk('li', x, staff && PH.test(x) ? 'fill' : '', ul); });
+  }
+  var how = String(p.how || '').trim();
+  mk('h2', cfg.howH, null, box);
+  mk('p', !staff && (!how || PH.test(how)) ? 'Please contact the school office for details.' : how, staff && PH.test(how) ? 'fill' : '', box);
+  mk('p', 'For requirements, schedules and the latest details, please contact the school at 0947 502 2362 or saintlouiscollegeofsolano@gmail.com.', 'note', box);
+}
+
+function schRenderEdit(box, cfg, p) {
+  var lab = function (t) { return mk('label', t, null, box); };
+  mk('div', 'Editing: ' + cfg.title, 'who', box);
+  lab('Overview'); var ov = mk('textarea', null, null, box); ov.value = p.overview || '';
+  lab(cfg.tableH + ' (' + cfg.cols.join(' / ') + ')');
+  var rowsBox = mk('div', null, null, box);
+  var addRow = function (r) {
+    var row = mk('div', null, 'sch-row', rowsBox);
+    for (var i = 0; i < 3; i++) { var inp = mk('input', null, null, row); inp.placeholder = cfg.cols[i]; inp.maxLength = 300; inp.value = r[i] || ''; }
+    var x = mk('button', 'Remove', 'sch-btn', row); x.type = 'button'; x.onclick = function () { row.remove(); };
+  };
+  (p.rows || []).forEach(addRow);
+  var add = mk('button', '+ Add row', 'sch-btn', box); add.type = 'button'; add.onclick = function () { addRow(['', '', '']); };
+  lab('Requirements (one per line)'); var rq = mk('textarea', null, null, box); rq.value = p.reqs || ''; rq.style.minHeight = '90px';
+  lab(cfg.howH); var hw = mk('textarea', null, null, box); hw.value = p.how || ''; hw.style.minHeight = '70px';
+  var msg = mk('div', null, 'msg', box), acts = mk('div', null, null, box); acts.style.cssText = 'display:flex;gap:10px;margin-top:14px';
+  var save = mk('button', 'Save', 'sch-btn pri', acts), cancel = mk('button', 'Cancel', 'sch-btn', acts);
+  cancel.onclick = function () { schEditing = false; schRender(); };
+  save.onclick = function () {
+    var rows = [].map.call(rowsBox.children, function (row) { return [].map.call(row.querySelectorAll('input'), function (i) { return i.value; }); });
+    save.disabled = true; msg.className = 'msg'; msg.textContent = 'Saving...';
+    api('schSave', { key: schKey, overview: ov.value, rows: rows, reqs: rq.value, how: hw.value })
+      .then(function () { schEditing = false; return loadSch(); })
+      .catch(function (err) { msg.textContent = err.message; save.disabled = false; });
+  };
+}
+
+function loadSch() {
+  return api('sch').then(function (r) { schData = r.pages || {}; schRender(); })
+    .catch(function (err) { $('schBody').textContent = err.message; });
+}
+$('schTabS').onclick = function () { schKey = 'scholarship'; schEditing = false; schRender(); };
+$('schTabD').onclick = function () { schKey = 'discount'; schEditing = false; schRender(); };
+$('openSch').addEventListener('click', function (e) {
+  e.preventDefault(); schEditing = false; schKey = 'scholarship';
+  $('schBody').textContent = 'Loading...'; openOv($('schModal')); loadSch();
 });
 </script>
 
