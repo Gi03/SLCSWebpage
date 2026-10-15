@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registrar Dashboard | Saint Louis College of Solano, Inc.</title>
+<style>
+  :root { --navy:#16337a; --navy-dark:#0d2456; --line:#d7dbe4; --bg:#f3f5fa; --text:#1a1a1a; --muted:#5b6475; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; font-family:Arial,'Helvetica Neue',Helvetica,sans-serif; color:var(--text); background:var(--bg); }
+  [hidden] { display:none !important; }
+  .top { background:var(--navy); color:#fff; display:flex; align-items:center; gap:14px; padding:10px 20px; flex-wrap:wrap; }
+  .top img { height:48px; width:auto; }
+  .top .t { flex:1 1 200px; } .top .t b { font-size:1.15rem; display:block; } .top .t small { opacity:.85; }
+  .top .r { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:.9rem; }
+  .top a { color:#fff; }
+  button, .btn { font:bold 14px Arial,sans-serif; padding:9px 16px; border:0; border-radius:6px; cursor:pointer; background:#e6e9f0; color:var(--navy-dark); }
+  button.pri { background:var(--navy); color:#fff; } button.pri:hover { background:var(--navy-dark); }
+  button.sm { padding:5px 10px; font-size:12px; } button.danger { color:#b00020; }
+  .top button { background:#fff; color:var(--navy); }
+  main { max-width:1250px; margin:0 auto; padding:18px 16px 40px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px 18px; }
+  .narrow { max-width:420px; margin:40px auto; }
+  h1,h2,h3 { color:var(--navy); margin:0 0 10px; } h2 { font-size:1.05rem; }
+  label { display:block; font-size:12.5px; font-weight:bold; margin:10px 0 4px; color:var(--navy-dark); }
+  input,select,textarea { width:100%; padding:9px 10px; border:1px solid #aab2c5; border-radius:6px; font:15px Arial,sans-serif; background:#fff; }
+  input:focus,select:focus,textarea:focus { outline:2px solid var(--navy); border-color:var(--navy); }
+  .msg { min-height:18px; margin-top:10px; font-size:14px; color:#b00020; } .msg.ok { color:#1b6e2d; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:14px; }
+  .stat { background:#fff; border:1px solid var(--line); border-left:5px solid var(--navy); border-radius:8px; padding:12px 14px; }
+  .stat b { display:block; font-size:1.8rem; color:var(--navy); } .stat span { color:var(--muted); font-size:.85rem; }
+  .stat.warn { border-left-color:#e0a000; cursor:pointer; }
+  .bars { display:grid; gap:6px; } .bar { display:grid; grid-template-columns:110px 1fr 36px; gap:8px; align-items:center; font-size:13px; }
+  .bar i { display:block; height:14px; background:var(--navy); border-radius:7px; min-width:3px; }
+  .tools { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 10px; align-items:center; }
+  .tools input { flex:1 1 220px; width:auto; } .tools select { width:auto; }
+  .tools label.chk { display:flex; align-items:center; gap:6px; margin:0; font-weight:normal; }
+  .tools label.chk input { width:auto; flex:none; }
+  .tbl { overflow-x:auto; background:#fff; border:1px solid var(--line); border-radius:10px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th,td { padding:9px 10px; text-align:left; border-bottom:1px solid #e8ebf2; vertical-align:middle; white-space:nowrap; }
+  th { background:#e8ecf6; color:var(--navy-dark); position:sticky; top:0; }
+  tr:hover td { background:#fafbfe; } td.code { font-family:monospace; }
+  .tag { padding:2px 9px; border-radius:10px; font-size:12px; font-weight:bold; background:#e8ecf6; color:var(--navy-dark); }
+  .tag.Enrolled { background:#d9eed9; color:#1b6e2d; } .tag.Dropped,.tag.Inactive { background:#f6d6d6; color:#8a1020; }
+  .more { text-align:center; padding:12px; }
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:flex-start; justify-content:center; padding:20px 12px; overflow-y:auto; z-index:50; }
+  .box { background:#fff; border-radius:10px; width:100%; max-width:760px; box-shadow:0 10px 40px rgba(0,0,0,.4); }
+  .box .h { background:var(--navy); color:#fff; padding:14px 20px; font-weight:bold; font-size:1.05rem; border-radius:10px 10px 0 0; display:flex; justify-content:space-between; }
+  .box .h button { background:none; color:#fff; font-size:22px; padding:0 4px; line-height:1; }
+  .box .b { padding:14px 20px 20px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0 12px; }
+  .full { grid-column:1 / -1; }
+  .acts { display:flex; gap:8px; margin-top:16px; }
+  .hint { color:var(--muted); font-size:13px; }
+  @media (max-width:560px) { .bar { grid-template-columns:80px 1fr 30px; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <img src="logo/SLCSI.png" alt="Saint Louis College of Solano logo">
+  <div class="t"><b>Registrar Dashboard</b><small>Saint Louis College of Solano, Inc.</small></div>
+  <div class="r"><span id="who"></span><a href="index.html">Back to website</a><button id="logout" hidden>Logout</button></div>
+</header>
+
+<main>
+  <section id="loginView" class="card narrow" hidden>
+    <h1>Registrar Login</h1>
+    <p class="hint">For the registrar and school administrators only.</p>
+    <form id="loginForm">
+      <label for="email">Email</label><input id="email" type="email" autocomplete="email" required>
+      <label for="pass">Password</label><input id="pass" type="password" autocomplete="current-password" required>
+      <button class="pri" style="width:100%;margin-top:14px" type="submit">Login</button>
+      <div class="msg" id="loginMsg" role="alert"></div>
+    </form>
+    <p class="hint">Forgot your password? Use <a href="index.html">Forgot password</a> on the main website.</p>
+  </section>
+
+  <section id="denied" class="card narrow" hidden>
+    <h1>Access denied</h1>
+    <p>The account <b id="deniedName"></b> is not a registrar account. Ask the school administrator to give you the <b>registrar</b> role.</p>
+    <button class="pri" id="deniedOut">Log out</button> <a class="btn" href="index.html">Back to website</a>
+  </section>
+
+  <section id="app" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="card" style="margin-bottom:14px"><h2>Enrolled students per grade / year level</h2><div class="bars" id="bars"></div></div>
+
+    <div class="tools">
+      <input id="q" placeholder="Search name, ID, section or guardian">
+      <select id="fLevel"><option value="All">All levels</option><option value="Basic">Basic Education</option><option value="College">College</option></select>
+      <select id="fStatus"><option value="All">All statuses</option></select>
+      <select id="fGrade"><option value="All">All grades / years</option></select>
+      <label class="chk"><input type="checkbox" id="fInc"> Incomplete only</label>
+      <button class="pri" id="add">+ Add student</button>
+      <button id="imp">Import list</button>
+      <button id="exp">Export CSV</button>
+    </div>
+    <div class="tbl"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table><div id="empty" class="more hint" hidden></div><div id="more" class="more" hidden><button id="moreBtn">Show more</button></div></div>
+  </section>
+</main>
+
+<div class="modal" id="formModal" hidden>
+  <div class="box">
+    <div class="h"><span id="formTitle">Add student</span><button data-close aria-label="Close">&times;</button></div>
+    <div class="b">
+      <form id="studentForm">
+        <div class="grid">
+          <div><label>Student ID *</label><input data-k="id" maxlength="30" required></div>
+          <div><label>Last name *</label><input data-k="last" maxlength="60" required></div>
+          <div><label>First name *</label><input data-k="first" maxlength="60" required></div>
+          <div><label>Middle name</label><input data-k="middle" maxlength="60"></div>
+          <div><label>Sex</label><select data-k="sex"><option value="">-</option><option>Male</option><option>Female</option></select></div>
+          <div><label>Birthdate</label><input data-k="birth" type="date"></div>
+          <div><label>Level *</label><select data-k="level"><option value="Basic">Basic Education</option><option value="College">College</option></select></div>
+          <div><label>Grade / Year level</label><input data-k="gradeYear" list="dlGY"></div>
+          <div><label>Section</label><input data-k="section" maxlength="60"></div>
+          <div><label>Program / Strand</label><input data-k="program" list="dlPG"></div>
+          <div><label>School year enrolled</label><input data-k="sy" placeholder="2026-2027" maxlength="20"></div>
+          <div><label>Status</label><select data-k="status"></select></div>
+          <div><label>Parent / guardian name</label><input data-k="guardian" maxlength="100"></div>
+          <div><label>Guardian contact number</label><input data-k="gcontact" type="tel" maxlength="40"></div>
+          <div><label>Email (parent or student)</label><input data-k="email" type="email" maxlength="120"></div>
+          <div class="full"><label>Home address</label><input data-k="address" maxlength="200"></div>
+        </div>
+        <datalist id="dlGY"></datalist><datalist id="dlPG"></datalist>
+        <div class="msg" id="formMsg" role="alert"></div>
+        <div class="acts"><button class="pri" type="submit" id="saveBtn">Save student</button><button type="button" data-close>Cancel</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="impModal" hidden>
+  <div class="box">
+    <div class="h"><span>Import a student list</span><button data-close aria-label="Close">&times;</button></div>
+    <div class="b">
+      <p class="hint">Paste rows copied from Excel or Google Sheets, one student per line. Columns in this order: Student ID, Last name, First name, Middle name, Level (Basic or College), Section, Grade / Year level, Program / Strand. Existing Student IDs are updated; new ones are added. Other details can be filled in later by editing each student.</p>
+      <textarea id="impText" style="min-height:170px;font-family:monospace" placeholder="2026-0001&#9;Dela Cruz&#9;Juan&#9;Reyes&#9;College&#9;BSCrim 1A&#9;1st Year&#9;BS Criminology"></textarea>
+      <div class="msg" id="impMsg" role="alert"></div>
+      <div class="acts"><button class="pri" id="impGo">Import</button><button data-close>Close</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var API_URL = 'https://script.google.com/macros/s/AKfycbyYhpNWHL-ztXELv_syX714KtyjqqS8pCbqPfkNCXNF0inIPYBJrOw6xtp2xPUmIgKg/exec';
+  var $ = function (id) { return document.getElementById(id); };
+  var auth = { token: null, user: null }, students = [], limit = 100, editing = null;
+  try { auth.token = localStorage.getItem('slcs_token'); } catch (e) {}
+  var STATUS = ['Enrolled', 'Transferred', 'Graduated', 'Dropped', 'Inactive'];
+  var GY = { Basic: ['Kinder', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'], College: ['1st Year', '2nd Year', '3rd Year', '4th Year'] };
+  var PG = { Basic: ['STEM', 'ABM', 'HUMSS', 'GAS', 'TVL'], College: ['BS Criminology', 'BS Management Accounting'] };
+  var ORDER = GY.Basic.concat(GY.College);
+
+  function api(action, data) {
+    return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ action: action, token: auth.token }, data || {})) })
+      .then(function (r) { return r.json(); })
+      .then(function (r) { if (!r.ok) throw new Error(r.error || 'Something went wrong.'); return r; });
+  }
+  function mk(tag, text, cls, parent) {
+    var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls;
+    if (parent) parent.appendChild(e); return e;
+  }
+  function view(name) {
+    $('loginView').hidden = name !== 'login'; $('denied').hidden = name !== 'denied'; $('app').hidden = name !== 'app';
+    $('logout').hidden = name === 'login'; if (name !== 'app') $('who').textContent = '';
+  }
+  function isAdmin() { return auth.user && (auth.user.role === 'admin' || auth.user.role === 'superadmin'); }
+
+  /* ---------- login / logout ---------- */
+  function init() {
+    if (!auth.token) { view('login'); return; }
+    api('me').then(function (r) {
+      auth.user = r.user;
+      if (!r.user.canRegistrar) { $('deniedName').textContent = r.user.name; view('denied'); return; }
+      $('who').textContent = r.user.name + ' (' + r.user.role + ')'; view('app'); load();
+    }).catch(function () { auth.token = null; try { localStorage.removeItem('slcs_token'); } catch (e) {} view('login'); });
+  }
+  function logout() {
+    var t = auth.token; auth.token = null; auth.user = null;
+    try { localStorage.removeItem('slcs_token'); } catch (e) {}
+    if (t) fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'logout', token: t }) }).catch(function () {});
+    view('login');
+  }
+  $('logout').onclick = logout; $('deniedOut').onclick = logout;
+  $('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var msg = $('loginMsg'); msg.className = 'msg'; msg.textContent = 'Please wait...';
+    api('login', { email: $('email').value, password: $('pass').value, device: navigator.userAgent.slice(0, 200) }).then(function (r) {
+      auth.token = r.token; try { localStorage.setItem('slcs_token', r.token); } catch (x) {}
+      $('pass').value = ''; msg.textContent = ''; init();
+    }).catch(function (err) { msg.textContent = err.message; });
+  });
+
+  /* ---------- data + filters ---------- */
+  function load() {
+    api('rList').then(function (r) { students = r.students; render(); })
+      .catch(function (err) {
+        if (/log in again/i.test(err.message)) { auth.token = null; view('login'); } else alert(err.message);
+      });
+  }
+  var inc = function (s) { return !s.birth || !s.guardian || !s.gcontact; };
+  function filtered() {
+    var t = $('q').value.trim().toLowerCase(), lv = $('fLevel').value, st = $('fStatus').value, gr = $('fGrade').value, onlyInc = $('fInc').checked;
+    return students.filter(function (s) {
+      return (lv === 'All' || s.level === lv) && (st === 'All' || s.status === st) && (gr === 'All' || s.gradeYear === gr) && (!onlyInc || inc(s)) &&
+        (!t || (s.name + ' ' + s.id + ' ' + s.section + ' ' + s.guardian).toLowerCase().indexOf(t) > -1);
+    }).sort(function (a, b) { return (a.last || a.name).localeCompare(b.last || b.name) || a.first.localeCompare(b.first); });
+  }
+  function fillSelects() {
+    var st = $('fStatus'), gr = $('fGrade'), cur = [st.value, gr.value];
+    st.textContent = ''; mk('option', 'All statuses', null, st).value = 'All';
+    STATUS.forEach(function (x) { mk('option', x, null, st).value = x; });
+    gr.textContent = ''; mk('option', 'All grades / years', null, gr).value = 'All';
+    var seen = {}; students.forEach(function (s) { if (s.gradeYear) seen[s.gradeYear] = 1; });
+    Object.keys(seen).sort(function (a, b) { var x = ORDER.indexOf(a), y = ORDER.indexOf(b); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y) || a.localeCompare(b); })
+      .forEach(function (x) { mk('option', x, null, gr).value = x; });
+    st.value = cur[0] || 'All'; gr.value = cur[1] || 'All';
+  }
+  function render() { fillSelects(); stats(); bars(); table(); }
+
+  function stats() {
+    var box = $('stats'); box.textContent = '';
+    var c = function (f) { return students.filter(f).length; };
+    [['Total students', students.length], ['Enrolled', c(function (s) { return s.status === 'Enrolled'; })],
+     ['Basic Education', c(function (s) { return s.level === 'Basic'; })], ['College', c(function (s) { return s.level === 'College'; })]]
+      .forEach(function (x) { var d = mk('div', null, 'stat', box); mk('b', String(x[1]), null, d); mk('span', x[0], null, d); });
+    var w = mk('div', null, 'stat warn', box); mk('b', String(c(inc)), null, w); mk('span', 'Incomplete records (click to review)', null, w);
+    w.onclick = function () { $('fInc').checked = true; limit = 100; table(); };
+  }
+  function bars() {
+    var box = $('bars'); box.textContent = ''; var by = {}, max = 1;
+    students.forEach(function (s) { if (s.status === 'Enrolled' && s.gradeYear) { by[s.gradeYear] = (by[s.gradeYear] || 0) + 1; max = Math.max(max, by[s.gradeYear]); } });
+    var keys = Object.keys(by).sort(function (a, b) { var x = ORDER.indexOf(a), y = ORDER.indexOf(b); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y) || a.localeCompare(b); });
+    if (!keys.length) { mk('span', 'No enrolled students with a grade / year level yet.', 'hint', box); return; }
+    keys.forEach(function (k) {
+      var r = mk('div', null, 'bar', box); mk('span', k, null, r); mk('i', null, null, mk('div', null, null, r)).style.width = (by[k] / max * 100) + '%'; mk('b', String(by[k]), null, r);
+    });
+  }
+  function table() {
+    var head = $('thead'), body = $('tbody'); head.textContent = ''; body.textContent = '';
+    ['ID', 'Name', 'Level', 'Grade / Year', 'Section', 'Program / Strand', 'Status', 'Guardian contact', 'Access code', ''].forEach(function (h) { mk('th', h, null, head); });
+    var list = filtered();
+    $('empty').hidden = list.length > 0; $('empty').textContent = students.length ? 'No students match.' : 'No students yet. Click "+ Add student" or "Import list".';
+    list.slice(0, limit).forEach(function (s) {
+      var tr = mk('tr', null, null, body);
+      mk('td', s.id, null, tr); mk('td', s.name, null, tr); mk('td', s.level === 'College' ? 'College' : 'Basic', null, tr);
+      mk('td', s.gradeYear, null, tr); mk('td', s.section, null, tr); mk('td', s.program, null, tr);
+      mk('span', s.status, 'tag ' + s.status, mk('td', null, null, tr)); mk('td', s.gcontact, null, tr); mk('td', s.code, 'code', tr);
+      var a = mk('td', null, null, tr);
+      mk('button', 'Edit', 'sm', a).onclick = function () { openForm(s); };
+      mk('button', 'Print slip', 'sm', a).onclick = function () { slip(s); };
+      mk('button', 'New code', 'sm', a).onclick = function () {
+        if (!confirm('Create a new access code for ' + s.name + '? Everyone currently linked to this student will lose access.')) return;
+        api('rCodeNew', { studentId: s.id }).then(load).catch(function (e) { alert(e.message); });
+      };
+      if (isAdmin()) mk('button', 'Delete', 'sm danger', a).onclick = function () {
+        if (!confirm('Delete ' + s.name + ' and ALL of this student\'s grades? This cannot be undone.')) return;
+        api('rDelete', { studentId: s.id }).then(load).catch(function (e) { alert(e.message); });
+      };
+    });
+    $('more').hidden = list.length <= limit;
+    $('moreBtn').textContent = 'Show more (' + (list.length - limit) + ' remaining)';
+  }
+  ['q', 'fLevel', 'fStatus', 'fGrade', 'fInc'].forEach(function (id) { $(id).addEventListener('input', function () { limit = 100; table(); }); });
+  $('moreBtn').onclick = function () { limit += 200; table(); };
+
+  /* ---------- add / edit ---------- */
+  function field(k) { return document.querySelector('[data-k="' + k + '"]'); }
+  function fillLists() {
+    var lv = field('level').value, a = $('dlGY'), b = $('dlPG'); a.textContent = ''; b.textContent = '';
+    GY[lv].forEach(function (x) { mk('option', null, null, a).value = x; }); PG[lv].forEach(function (x) { mk('option', null, null, b).value = x; });
+  }
+  function openForm(s) {
+    editing = s; var d = s || { level: 'Basic', status: 'Enrolled', sy: (function () { var n = new Date(), y = n.getFullYear(); return n.getMonth() >= 5 ? y + '-' + (y + 1) : (y - 1) + '-' + y; })() };
+    var st = field('status'); st.textContent = ''; STATUS.forEach(function (x) { mk('option', x, null, st); });
+    document.querySelectorAll('[data-k]').forEach(function (el) { el.value = d[el.getAttribute('data-k')] || ''; });
+    field('id').readOnly = !!s; $('formTitle').textContent = s ? 'Edit student' : 'Add student'; $('formMsg').textContent = '';
+    fillLists(); $('formModal').hidden = false; (s ? field('last') : field('id')).focus();
+  }
+  field('level').addEventListener('change', fillLists);
+  $('add').onclick = function () { openForm(null); };
+  $('studentForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var rec = {}; document.querySelectorAll('[data-k]').forEach(function (el) { rec[el.getAttribute('data-k')] = el.value; });
+    var btn = $('saveBtn'), msg = $('formMsg'); btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Saving...';
+    api('rSave', { rec: rec }).then(function () { $('formModal').hidden = true; load(); })
+      .catch(function (err) { msg.textContent = err.message; }).then(function () { btn.disabled = false; });
+  });
+
+  /* ---------- import / export / slip ---------- */
+  $('imp').onclick = function () { $('impMsg').textContent = ''; $('impModal').hidden = false; };
+  $('impGo').onclick = function () {
+    var rows = [];
+    $('impText').value.split('\n').forEach(function (line) {
+      if (!line.trim()) return;
+      var c = (line.indexOf('\t') > -1 ? line.split('\t') : line.split(',')).map(function (x) { return x.trim(); });
+      if (/^student\s*id$/i.test(c[0])) return;
+      rows.push({ id: c[0], last: c[1], first: c[2], middle: c[3], level: /college/i.test(c[4] || '') ? 'College' : 'Basic', section: c[5], gradeYear: c[6], program: c[7] });
+    });
+    var msg = $('impMsg'), go = $('impGo');
+    if (!rows.length) { msg.className = 'msg'; msg.textContent = 'Nothing to import.'; return; }
+    go.disabled = true; msg.className = 'msg'; msg.textContent = 'Importing ' + rows.length + ' rows...';
+    api('rImport', { rows: rows }).then(function (r) {
+      msg.className = r.errors.length ? 'msg' : 'msg ok';
+      msg.textContent = r.added + ' added, ' + r.updated + ' updated.' + (r.errors.length ? ' Skipped: ' + r.errors.slice(0, 10).join(' | ') : '');
+      if (!r.errors.length) $('impText').value = '';
+      load();
+    }).catch(function (e) { msg.className = 'msg'; msg.textContent = e.message; }).then(function () { go.disabled = false; });
+  };
+  $('exp').onclick = function () {
+    var cols = [['id', 'Student ID'], ['last', 'Last name'], ['first', 'First name'], ['middle', 'Middle name'], ['sex', 'Sex'], ['birth', 'Birthdate'], ['level', 'Level'],
+      ['gradeYear', 'Grade/Year'], ['section', 'Section'], ['program', 'Program/Strand'], ['sy', 'School year'], ['status', 'Status'], ['guardian', 'Guardian'],
+      ['gcontact', 'Guardian contact'], ['email', 'Email'], ['address', 'Address'], ['code', 'Access code']];
+    var q = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+    var csv = '\ufeff' + cols.map(function (c) { return q(c[1]); }).join(',') + '\r\n' +
+      filtered().map(function (s) { return cols.map(function (c) { return q(s[c[0]]); }).join(','); }).join('\r\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'students.csv'; document.body.appendChild(a); a.click(); a.remove();
+  };
+  function slip(s) {
+    var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var site = new URL('index.html', location.href).href, w = window.open('', '_blank');
+    if (!w) { alert('Please allow pop-ups to print the slip.'); return; }
+    w.document.write('<title>Access slip</title><body style="font-family:Arial;max-width:480px;margin:30px auto;border:2px solid #16337a;padding:22px">' +
+      '<h2 style="margin:0;color:#16337a">Saint Louis College of Solano, Inc.</h2><p style="margin:4px 0 16px">Parent / Student Grades Access</p>' +
+      '<p>Student: <b>' + esc(s.name) + '</b><br>Student ID: <b>' + esc(s.id) + '</b><br>Access code: <b style="font-size:22px;letter-spacing:2px">' + esc(s.code) + '</b></p>' +
+      '<ol><li>Go to ' + esc(site) + '</li><li>Register or log in</li><li>Open <b>Grades</b>, then <b>Link a Student</b></li><li>Enter the Student ID and access code above</li></ol>' +
+      '<p style="font-size:12px;color:#555">Keep this code private. Ask the registrar for a new code if it is lost.</p></body>');
+    w.document.close(); w.focus(); w.print();
+  }
+
+  document.querySelectorAll('[data-close]').forEach(function (b) { b.addEventListener('click', function () { $('formModal').hidden = true; $('impModal').hidden = true; }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { $('formModal').hidden = true; $('impModal').hidden = true; } });
+  init();
+})();
+</script>
+</body>
+</html>
