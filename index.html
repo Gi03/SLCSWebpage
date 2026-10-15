@@ -612,6 +612,20 @@ header.banner .banner-text p {
   @media (max-width:480px) { .vcard { grid-template-columns:1fr; gap:2px; } }
   .who { font-size:13px; margin-bottom:12px; color:#33415c; }
   .who a { color:var(--navy); text-decoration:underline; cursor:pointer; }
+
+  /* ===== Per-user dashboard ===== */
+  #dash { display:none; }
+  .dash-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; }
+  .dash-bar h2 { margin:0; font-size:clamp(22px,3vw,32px); }
+  .dash-role { display:inline-block; margin-left:10px; padding:3px 12px; border-radius:14px; background:var(--navy); color:#fff; font-size:13px; font-weight:bold; text-transform:capitalize; vertical-align:middle; }
+  .dash-sec { margin:24px 0 10px; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:#556; font-weight:bold; }
+  .dash-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:18px; }
+  .dcard { text-align:left; background:#fff; border:1px solid #c9cfdc; border-left:5px solid var(--navy); border-radius:8px; padding:16px 18px; font:15px Arial,sans-serif; color:var(--text-dark); box-shadow:0 2px 6px rgba(0,0,0,.08); }
+  button.dcard { cursor:pointer; transition:transform .15s ease, box-shadow .15s ease; }
+  button.dcard:hover, button.dcard:focus-visible { transform:translateY(-2px); box-shadow:0 6px 14px rgba(0,0,0,.18); }
+  .dcard b { display:block; font-size:17px; color:var(--navy); margin-bottom:4px; }
+  .dcard span { color:#445; line-height:1.45; }
+  .dcard .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
 </style>
 </head>
 <body>
@@ -628,9 +642,12 @@ header.banner .banner-text p {
 	</header>
 
   <main>
-    
+    <div id="dash">
+      <div class="dash-bar" id="dashBar"></div>
+      <div id="dashCards"></div>
+    </div>
 
-    <div class="content-grid">
+    <div class="content-grid" id="publicGrid">
       <nav class="links">
         <div class="has-submenu" id="tourMenu">
           <a class="nav-link toggle" href="#tour" id="tourToggle" aria-expanded="false" aria-controls="tourSubmenu">
@@ -659,6 +676,9 @@ header.banner .banner-text p {
         </div>
 
         <a class="nav-link" href="#scholarships-discounts" id="openSch">Scholarships &amp; Discounts</a>
+        <a class="nav-link" href="registrar.html" id="openReg" style="display:none">Registrar</a>
+        <a class="nav-link" href="#grades" id="openGr" style="display:none">Grades</a>
+        <a class="nav-link" href="#session-monitor" id="openMon" style="display:none">Session Monitor</a>
 
         <div class="has-submenu" id="newsMenu">
           <a class="nav-link toggle" href="#news" id="newsToggle" aria-expanded="false" aria-controls="newsSubmenu">
@@ -711,7 +731,7 @@ header.banner .banner-text p {
   </footer>
 
   <div class="copyright">
-    &copy; <span id="year">2026</span> Saint Louis College of Solano, Inc. All rights reserved.
+    &copy; <span id="year">2026</span> Saint Louis College of Solano, Inc. All rights reserved. &nbsp;&bull;&nbsp; Visitors: <b id="visitCount">&ndash;</b>
   </div>
 
 
@@ -724,9 +744,11 @@ header.banner .banner-text p {
         <form id="authForm" autocomplete="on">
           <div id="nameRow" style="display:none"><label for="aName">Full name</label><input id="aName" autocomplete="name" maxlength="80"></div>
           <label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="email" required>
-          <label for="aPass">Password <span id="passHint" style="font-weight:normal"></span></label><input id="aPass" type="password" autocomplete="current-password" required>
+          <div id="codeRow" style="display:none"><label for="aCode">6-digit code from your email</label><input id="aCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></div>
+          <div id="passRow"><label for="aPass">Password <span id="passHint" style="font-weight:normal"></span></label><input id="aPass" type="password" autocomplete="current-password" required></div>
           <button class="btn-main" id="authGo" type="submit">Login</button>
           <div class="msg" id="authMsg" role="alert"></div>
+          <div style="text-align:center;margin-top:8px"><a href="#" id="forgotLink" style="color:var(--navy);font-size:14px">Forgot password?</a></div>
         </form>
       </div>
     </div>
@@ -805,6 +827,29 @@ header.banner .banner-text p {
       <button class="ov-close" data-close aria-label="Close">&times;</button>
       <div class="ov-head ic"><img id="pgIcon" src="" alt=""><div><div id="pgTitleH"></div><p>Saint Louis College of Solano, Inc.</p></div></div>
       <div class="ov-body"><div class="sch" id="pgBody">Loading...</div></div>
+    </div>
+  </div>
+
+  <div class="ov" id="monModal" aria-hidden="true">
+    <div class="ov-box wide" style="max-width:920px" role="dialog" aria-label="Session Monitor">
+      <button class="ov-close" data-close aria-label="Close">&times;</button>
+      <div class="ov-head">Session Monitor</div>
+      <div class="ov-body">
+        <div class="tabs"><button type="button" id="monTabS" class="on">Active Sessions</button><button type="button" id="monTabE">Activity Log</button><button type="button" id="monTabU">Users</button><button type="button" id="monTabV">Visitors</button></div>
+        <div class="who" id="monInfo"></div>
+        <div class="sch" id="monBody">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ov" id="grModal" aria-hidden="true">
+    <div class="ov-box wide" style="max-width:900px" role="dialog" aria-label="Grades">
+      <button class="ov-close" data-close aria-label="Close">&times;</button>
+      <div class="ov-head">Grades</div>
+      <div class="ov-body">
+        <div class="tabs" id="grTabs"></div>
+        <div class="sch" id="grBody">Loading...</div>
+      </div>
     </div>
   </div>
 
@@ -1049,7 +1094,7 @@ document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ca
 
 /* ===== Accounts & Announcements (Google Sheet backend) ===== */
 // Paste the Web app URL you get after deploying Code.gs (ends with /exec)
-var API_URL = 'https://script.google.com/macros/s/AKfycbwxR0I35ejPlxlTJARz2u7qfrPFBpGyQKVDibgj0OQePNY5gLHxSd4m_Dwr-h5APsuy/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbyYhpNWHL-ztXELv_syX714KtyjqqS8pCbqPfkNCXNF0inIPYBJrOw6xtp2xPUmIgKg/exec';
 
 var auth = { token: null, user: null };
 try { auth.token = localStorage.getItem('slcs_token'); } catch (e) {}
@@ -1079,13 +1124,71 @@ function setSession(token, user) {
   b.classList.toggle('is-in', !!user);
   b.title = user ? 'Logged in as ' + user.name : '';
   $('visitsLi').style.display = user && user.canPost ? '' : 'none';
+  $('openMon').style.display = user && user.role === 'superadmin' ? '' : 'none';
+  $('openGr').style.display = user ? '' : 'none';
+  $('openReg').style.display = user && user.canRegistrar ? '' : 'none';
+  dashPublic = false; renderDash();
 }
+
+/* ===== Per-user dashboard (what each role sees after login) ===== */
+var dashPublic = false;
+function dashClick(id) { var e = $(id); if (e) e.click(); }
+function dashItems() {
+  var u = auth.user, staff = isStaff(), items = [];
+  // Everyone who is logged in
+  items.push({ sec: 'My School', title: staff ? 'Encode Grades & Reports' : 'My Grades',
+    desc: staff ? 'Enter class grades and look up student reports.' : 'See the grades of your linked student, or link a new student.',
+    fn: function () { dashClick('openGr'); } });
+  items.push({ sec: 'My School', title: staff ? 'Post Announcements' : 'Latest Announcements',
+    desc: staff ? 'Read and post school announcements.' : 'Read the latest news from the school.',
+    fn: function () { dashClick('openAnn'); } });
+  items.push({ sec: 'My School', title: 'School Calendar', desc: 'Upcoming school events and dates.', fn: function () { dashClick('openCal'); } });
+  items.push({ sec: 'My School', title: 'Scholarships & Discounts',
+    desc: staff ? 'View and edit the scholarship and discount pages.' : 'Grants, sibling and alumni discounts.',
+    fn: function () { dashClick('openSch'); } });
+  // Staff, registrar, admin
+  if (u.canRegistrar) items.push({ sec: 'Staff Tools', title: 'Registrar', desc: 'Manage students, sections and access codes.', fn: function () { location.href = 'registrar.html'; } });
+  if (u.canPost) items.push({ sec: 'Staff Tools', title: 'Visit Requests', desc: 'Review and confirm campus visit requests.', fn: function () { dashClick('openVisits'); } });
+  // Admin and super admin
+  if (isAdmin()) {
+    var chips = [];
+    document.querySelectorAll('a[data-pg]').forEach(function (a) { chips.push({ label: a.textContent, pg: a.getAttribute('data-pg') }); });
+    items.push({ sec: 'Administration', title: 'Courses & Offerings', desc: 'Open a program page to view or edit it.', chips: chips });
+  }
+  if (u.role === 'superadmin') items.push({ sec: 'Administration', title: 'Session Monitor', desc: 'Active sessions, activity log, users and visitors.', fn: function () { dashClick('openMon'); } });
+  return items;
+}
+function renderDash() {
+  var u = auth.user, dash = $('dash'), grid = $('publicGrid');
+  if (!u) { dash.style.display = 'none'; grid.style.display = ''; return; }
+  dash.style.display = 'block';
+  var bar = $('dashBar'), cards = $('dashCards'); bar.textContent = ''; cards.textContent = '';
+  var h = mk('h2', (dashPublic ? 'School website' : 'Welcome, ' + u.name), null, bar);
+  if (!dashPublic) mk('span', u.role, 'dash-role', h);
+  var tg = mk('button', dashPublic ? '\u2190 Back to my dashboard' : 'View school website', 'sch-btn pri', bar); tg.type = 'button';
+  tg.onclick = function () { dashPublic = !dashPublic; renderDash(); };
+  grid.style.display = dashPublic ? '' : 'none';
+  if (dashPublic) return;
+  var cur = null, box = null;
+  dashItems().forEach(function (it) {
+    if (it.sec !== cur) { cur = it.sec; mk('div', cur, 'dash-sec', cards); box = mk('div', null, 'dash-grid', cards); }
+    if (it.chips) {
+      var c = mk('div', null, 'dcard', box); mk('b', it.title, null, c); mk('span', it.desc, null, c);
+      var row = mk('div', null, 'chips', c);
+      it.chips.forEach(function (ch) { var b = mk('button', ch.label, 'sch-btn', row); b.type = 'button'; b.onclick = function () { dashClick2(ch.pg); }; });
+    } else {
+      var k = mk('button', null, 'dcard', box); k.type = 'button'; mk('b', it.title, null, k); mk('span', it.desc, null, k); k.onclick = it.fn;
+    }
+  });
+}
+function dashClick2(pg) { var a = document.querySelector('a[data-pg="' + pg + '"]'); if (a) a.click(); }
+
 if (auth.token) {
   api('me').then(function (r) { setSession(auth.token, r.user); }).catch(function () { setSession(null, null); });
 }
 
 /* login / register pop-up */
-var regMode = false;
+var regMode = false, fMode = 0;   // fMode: 0 = normal, 1 = ask for code, 2 = enter code + new password
 function setMode(reg) {
   regMode = reg;
   $('tabLogin').classList.toggle('on', !reg); $('tabReg').classList.toggle('on', reg);
@@ -1093,7 +1196,10 @@ function setMode(reg) {
   $('aPass').autocomplete = reg ? 'new-password' : 'current-password';
   $('passHint').textContent = reg ? '(at least 8 characters)' : '';
   $('authGo').textContent = reg ? 'Create Account' : 'Login';
-  $('authMsg').textContent = '';
+  $('authMsg').className = 'msg'; $('authMsg').textContent = ''; fMode = 0;
+  $('passRow').style.display = 'block'; $('aPass').required = true;
+  $('codeRow').style.display = 'none'; $('aCode').required = false;
+  $('forgotLink').style.display = reg ? 'none' : 'inline';
 }
 $('tabLogin').onclick = function () { setMode(false); };
 $('tabReg').onclick = function () { setMode(true); };
@@ -1112,8 +1218,9 @@ $('loginBtn').addEventListener('click', function (e) {
 $('authForm').addEventListener('submit', function (e) {
   e.preventDefault();
   var go = $('authGo'), msg = $('authMsg');
+  if (fMode) { forgotSubmit(go, msg); return; }
   go.disabled = true; msg.className = 'msg'; msg.textContent = 'Please wait...';
-  api(regMode ? 'register' : 'login', { name: $('aName').value, email: $('aEmail').value, password: $('aPass').value })
+  api(regMode ? 'register' : 'login', { name: $('aName').value, email: $('aEmail').value, password: $('aPass').value, device: navigator.userAgent.slice(0, 200) })
     .then(function (r) {
       setSession(r.token, r.user);
       $('aPass').value = '';
@@ -1121,6 +1228,30 @@ $('authForm').addEventListener('submit', function (e) {
     })
     .catch(function (err) { msg.textContent = err.message === 'Failed to fetch' ? 'Cannot reach the server.' : err.message; })
     .then(function () { go.disabled = false; });
+});
+
+/* forgot password */
+function forgotSubmit(go, msg) {
+  go.disabled = true; msg.className = 'msg'; msg.textContent = 'Please wait...';
+  var p = fMode === 1 ? api('forgot', { email: $('aEmail').value })
+    : api('reset', { email: $('aEmail').value, code: $('aCode').value, password: $('aPass').value });
+  p.then(function () {
+    if (fMode === 1) {
+      fMode = 2; $('codeRow').style.display = 'block'; $('aCode').required = true;
+      $('passRow').style.display = 'block'; $('aPass').required = true; $('aPass').autocomplete = 'new-password';
+      $('passHint').textContent = '(new password, at least 8 characters)'; go.textContent = 'Reset Password';
+      msg.className = 'msg ok'; msg.textContent = 'If that email is registered, a 6-digit code was sent. It expires in 15 minutes.';
+    } else {
+      setMode(false); $('aPass').value = ''; $('aCode').value = '';
+      $('authMsg').className = 'msg ok'; $('authMsg').textContent = 'Password changed. Please log in with your new password.';
+    }
+  }).catch(function (err) { msg.textContent = err.message; }).then(function () { go.disabled = false; });
+}
+$('forgotLink').addEventListener('click', function (e) {
+  e.preventDefault(); fMode = 1;
+  $('passRow').style.display = 'none'; $('aPass').required = false; $('nameRow').style.display = 'none';
+  $('authGo').textContent = 'Send Code'; $('forgotLink').style.display = 'none';
+  $('authMsg').className = 'msg'; $('authMsg').textContent = 'Enter your email and we will send you a code.';
 });
 
 /* announcements pop-up */
@@ -1295,7 +1426,7 @@ function mk(tag, text, cls, parent) {
   var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls;
   if (parent) parent.appendChild(e); return e;
 }
-function isAdmin() { return !!(auth.user && auth.user.role === 'admin'); }
+function isAdmin() { return !!(auth.user && (auth.user.role === 'admin' || auth.user.role === 'superadmin')); }
 function isStaff() { return !!(auth.user && auth.user.canPost); }
 function schPage(k) { return schData[k] || SCH[k].def; }
 
@@ -1474,6 +1605,289 @@ document.querySelectorAll('a[data-pg]').forEach(function (a) {
     e.preventDefault(); pgKey = a.getAttribute('data-pg'); pgEditing = false;
     $('pgBody').textContent = 'Loading...'; openOv($('pgModal')); loadPg();
   });
+});
+
+/* ===== Session Monitor (super admin only) ===== */
+var monStats = [], monUsers = [], monTab = 'sessions', monData = null, monFilter = 'All', monTimer = null;
+function monWhen(x) { var d = new Date(x); return isNaN(d) ? '' : d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
+function monLoad() {
+  api('monitor').then(function (r) { monData = r; monRender(); }).catch(function (err) { $('monBody').textContent = err.message; });
+}
+function monRender() {
+  var box = $('monBody'); box.textContent = '';
+  $('monTabS').classList.toggle('on', monTab === 'sessions'); $('monTabE').classList.toggle('on', monTab === 'events'); $('monTabU').classList.toggle('on', monTab === 'users'); $('monTabV').classList.toggle('on', monTab === 'visitors');
+  $('monInfo').textContent = monData.sessions.length + ' active session(s) \u2022 ' + monData.users + ' registered user(s) \u2022 refreshes every 15 seconds';
+  var w = mk('div', null, 'tbl', box), t = mk('table', null, null, w), hr = mk('tr', null, null, t);
+  if (monTab === 'sessions') {
+    ['User', 'Role', 'Signed in', 'Expires', 'Device', ''].forEach(function (h) { mk('th', h, null, hr); });
+    if (!monData.sessions.length) { mk('p', 'No active sessions.', null, box); }
+    monData.sessions.forEach(function (s) {
+      var tr = mk('tr', null, null, t), u = mk('td', null, null, tr);
+      mk('b', s.name || s.email, null, u); if (s.you) mk('span', ' (you)', null, u);
+      mk('div', s.email, 'who', u).style.margin = '0';
+      mk('td', s.role, null, tr); mk('td', s.started ? monWhen(s.started) : '-', null, tr);
+      mk('td', monWhen(s.expires), null, tr); mk('td', s.device || '-', null, tr);
+      var b = mk('button', 'Force logout', 'sch-btn', mk('td', null, null, tr));
+      b.onclick = function () {
+        if (!confirm('Sign ' + (s.name || s.email) + ' out of this session?')) return;
+        api('kill', { id: s.id }).then(function () {
+          if (s.you) { setSession(null, null); closeOv($('monModal')); } else monLoad();
+        }).catch(function (err) { alert(err.message); });
+      };
+    });
+    return;
+  }
+  if (monTab === 'visitors') {
+    var td = new Date(), cut = function (n) { return ymd(new Date(td.getFullYear(), td.getMonth(), td.getDate() - n + 1)); };
+    var tot = function (from, k) { return monStats.filter(function (d) { return d.date >= from; }).reduce(function (a, d) { return a + d[k]; }, 0); };
+    ['Period', 'Visits', 'Unique visitors', 'New visitors'].forEach(function (h) { mk('th', h, null, hr); });
+    [['Today', cut(1)], ['Last 7 days', cut(7)], ['Last 30 days', cut(30)], ['All time', '0000']].forEach(function (p) {
+      var tr = mk('tr', null, null, t); mk('td', p[0], null, tr).style.fontWeight = 'bold';
+      ['visits', 'unique', 'newv'].forEach(function (k) { mk('td', tot(p[1], k).toLocaleString(), null, tr); });
+    });
+    mk('p', 'A "visit" is counted once each time someone opens the site in a new browser session. "Unique" counts a person once per day; "New" counts first-time visitors. Bots and repeat refreshes can slightly change the numbers.', 'who', box);
+    mk('h2', 'Daily breakdown (last 30 days)', null, box);
+    var w2 = mk('div', null, 'tbl', box), t2 = mk('table', null, null, w2), h2 = mk('tr', null, null, t2);
+    ['Date', 'Visits', 'Unique', 'New'].forEach(function (h) { mk('th', h, null, h2); });
+    monStats.slice(0, 30).forEach(function (d) {
+      var tr = mk('tr', null, null, t2); mk('td', d.date, null, tr); mk('td', String(d.visits), null, tr); mk('td', String(d.unique), null, tr); mk('td', String(d.newv), null, tr);
+    });
+    if (!monStats.length) mk('p', 'No visits recorded yet.', null, box);
+    return;
+  }
+  if (monTab === 'users') {
+    ['User', 'Role', 'Joined', ''].forEach(function (h) { mk('th', h, null, hr); });
+    if (!monUsers.length) mk('p', 'No users.', null, box);
+    monUsers.forEach(function (u) {
+      var tr = mk('tr', null, null, t), c = mk('td', null, null, tr);
+      mk('b', u.name, null, c); if (u.you) mk('span', ' (you)', null, c);
+      mk('div', u.email, 'who', c).style.margin = '0';
+      var rc = mk('td', null, null, tr);
+      if (u.you) rc.textContent = u.role;
+      else {
+        var sel = mk('select', null, null, rc); sel.style.cssText = 'padding:6px;border:1px solid #aab2c5;border-radius:6px;font:14px Arial,sans-serif';
+        ['member', 'staff', 'registrar', 'admin', 'superadmin'].forEach(function (r) { var o = mk('option', r, null, sel); o.selected = r === u.role; });
+        sel.onchange = function () {
+          if (!confirm('Change ' + u.name + ' to ' + sel.value + '?')) { sel.value = u.role; return; }
+          api('setRole', { email: u.email, role: sel.value }).then(function () { u.role = sel.value; })
+            .catch(function (err) { alert(err.message); sel.value = u.role; });
+        };
+      }
+      mk('td', u.created ? monWhen(u.created) : '-', null, tr);
+      var dc = mk('td', null, null, tr);
+      if (!u.you) mk('button', 'Delete', 'sch-btn', dc).onclick = function () {
+        if (!confirm('Delete the account of ' + u.name + '? They will be signed out.')) return;
+        api('delUser', { email: u.email }).then(loadUsers).catch(function (err) { alert(err.message); });
+      };
+    });
+    return;
+  }
+  var acts = ['All']; monData.events.forEach(function (e) { if (acts.indexOf(e.action) < 0) acts.push(e.action); });
+  var bar = mk('div', null, null, box); bar.style.marginBottom = '10px'; box.insertBefore(bar, w);
+  var sel = mk('select', null, null, bar); sel.style.cssText = 'padding:6px 10px;border:1px solid #aab2c5;border-radius:6px;font:14px Arial,sans-serif';
+  acts.forEach(function (a) { var o = mk('option', a.replace(/_/g, ' '), null, sel); o.value = a; o.selected = a === monFilter; });
+  sel.onchange = function () { monFilter = sel.value; monRender(); };
+  ['Time', 'User', 'Event', 'Details'].forEach(function (h) { mk('th', h, null, hr); });
+  var list = monData.events.filter(function (e) { return monFilter === 'All' || e.action === monFilter; });
+  if (!list.length) mk('p', 'No events yet.', null, box);
+  list.forEach(function (e) {
+    var tr = mk('tr', null, null, t);
+    mk('td', monWhen(e.time), null, tr); mk('td', e.name || e.email, null, tr);
+    var a = mk('td', e.action.replace(/_/g, ' '), null, tr); a.style.fontWeight = 'bold';
+    if (/failed|delete|ended|locked/.test(e.action)) a.style.color = '#b00020';
+    mk('td', e.details, null, tr);
+  });
+}
+$('monTabS').onclick = function () { monTab = 'sessions'; if (monData) monRender(); };
+$('monTabE').onclick = function () { monTab = 'events'; if (monData) monRender(); };
+function loadUsers() {
+  api('users').then(function (r) { monUsers = r.users; if (monData) monRender(); else monLoad(); })
+    .catch(function (err) { $('monBody').textContent = err.message; });
+}
+$('monTabU').onclick = function () { monTab = 'users'; loadUsers(); };
+$('monTabV').onclick = function () {
+  monTab = 'visitors';
+  api('stats').then(function (r) { monStats = r.days; if (monData) monRender(); else monLoad(); })
+    .catch(function (err) { $('monBody').textContent = err.message; });
+};
+$('openMon').addEventListener('click', function (e) {
+  e.preventDefault(); monTab = 'sessions'; monData = null; $('monBody').textContent = 'Loading...';
+  openOv($('monModal')); monLoad();
+  clearInterval(monTimer);
+  monTimer = setInterval(function () {
+    if (!$('monModal').classList.contains('show')) { clearInterval(monTimer); return; }
+    if (monTab !== 'users') monLoad();
+  }, 15000);
+});
+
+/* ===== Visitor counter ===== */
+(function () {
+  var counted = false, newToday = false, firstEver = false;
+  try {
+    var today = ymd(new Date());
+    counted = !!sessionStorage.getItem('slcs_hit');
+    if (!localStorage.getItem('slcs_vid')) { firstEver = true; localStorage.setItem('slcs_vid', Math.random().toString(36).slice(2)); }
+    newToday = localStorage.getItem('slcs_day') !== today; localStorage.setItem('slcs_day', today);
+    sessionStorage.setItem('slcs_hit', '1');
+  } catch (e) {}
+  api('hit', { count: !counted, newToday: newToday && !counted, firstEver: firstEver && !counted })
+    .then(function (r) { $('visitCount').textContent = r.total.toLocaleString(); })
+    .catch(function () {});
+})();
+
+/* ===== Grades (stored in a separate Google Sheet) ===== */
+var GR_BASIC = ['1st Quarter', '2nd Quarter', '3rd Quarter', '4th Quarter'], GR_SEMS = ['1st Sem', '2nd Sem', 'Summer'], GR_PERIODS = ['Prelim', 'Midterm', 'Pre-Final', 'Final', 'Final Grade'];
+var GR_PASS = 75, GR_CPASS = 3, grTab = 'my', grStudents = [], grSubjects = [];
+function grTermIdx(t) {
+  var b = GR_BASIC.indexOf(t); if (b > -1) return b;
+  var p = t.split(' - '); return 10 + GR_SEMS.indexOf(p[0]) * 10 + GR_PERIODS.indexOf(p[1]);
+}
+function grLevel(sec) { var s = grStudents.filter(function (x) { return x.section === sec; })[0]; return s ? s.level : 'Basic'; }
+function grSY() { var d = new Date(), y = d.getFullYear(); return d.getMonth() >= 5 ? y + '-' + (y + 1) : (y - 1) + '-' + y; }
+function grFld(row, label, el) { var d = mk('div', null, null, row); mk('label', label, null, d); d.appendChild(el); return el; }
+function grSections() {
+  var o = []; grStudents.forEach(function (s) { if (s.section && o.indexOf(s.section) < 0) o.push(s.section); }); return o.sort();
+}
+function grLoadStaff(cb) {
+  api('gStudents').then(function (r) { grStudents = r.students; grSubjects = r.subjects; cb(); })
+    .catch(function (e) { $('grBody').textContent = e.message; });
+}
+function grShow() {
+  var t = $('grTabs'); t.textContent = '';
+  var tabs = isStaff() ? [['enc', 'Encode Grades'], ['rep', 'Student Report']] : [['my', 'My Grades'], ['link', 'Link a Student']];
+  if (!tabs.some(function (x) { return x[0] === grTab; })) grTab = tabs[0][0];
+  tabs.forEach(function (x) { var b = mk('button', x[1], x[0] === grTab ? 'on' : '', t); b.type = 'button'; b.onclick = function () { grTab = x[0]; grShow(); }; });
+  var box = $('grBody'); box.textContent = '';
+  ({ my: grMy, link: grLink, enc: grEnc, rep: grRep })[grTab](box);
+}
+
+function grCard(box, st) {
+  var college = st.level === 'College';
+  mk('h2', st.name + ' \u2022 ' + st.section + ' (ID ' + st.id + ')', null, box);
+  if (!st.grades.length) { mk('p', 'No grades recorded yet.', null, box); return; }
+  var by = {};
+  st.grades.forEach(function (g) { var k = g.sy + '|' + g.term; (by[k] = by[k] || []).push(g); });
+  Object.keys(by).sort(function (a, b) {
+    var x = a.split('|'), y = b.split('|');
+    return x[0] === y[0] ? grTermIdx(x[1]) - grTermIdx(y[1]) : (x[0] < y[0] ? 1 : -1);
+  }).forEach(function (k) {
+    var p = k.split('|'); mk('h3', 'S.Y. ' + p[0] + ' \u2022 ' + p[1], null, box).style.cssText = 'color:var(--navy);margin:14px 0 4px';
+    var w = mk('div', null, 'tbl', box), t = mk('table', null, null, w), hr = mk('tr', null, null, t), sum = 0, n = 0, wsum = 0, usum = 0;
+    (college ? ['Subject', 'Units', 'Grade', 'Remarks'] : ['Subject', 'Grade', 'Remarks']).forEach(function (h) { mk('th', h, null, hr); });
+    by[k].sort(function (a, b) { return a.subject.localeCompare(b.subject); }).forEach(function (g) {
+      var tr = mk('tr', null, null, t), num = Number(g.grade), ok = !isNaN(num), pass = college ? (num >= 1 && num <= GR_CPASS) : num >= GR_PASS;
+      mk('td', g.subject, null, tr);
+      if (college) mk('td', g.units || '-', null, tr);
+      mk('td', college && ok ? num.toFixed(2) : g.grade, null, tr).style.fontWeight = 'bold';
+      var r = mk('td', ok ? (pass ? 'Passed' : 'Failed') : ({ INC: 'Incomplete', DRP: 'Dropped', W: 'Withdrawn' }[g.grade] || ''), null, tr);
+      if (ok && !pass) r.style.color = '#b00020';
+      if (ok) { sum += num; n++; var u = Number(g.units) || 0; wsum += num * u; usum += u; }
+    });
+    if (n) {
+      var weighted = college && usum > 0, avg = weighted ? wsum / usum : sum / n;
+      var tr = mk('tr', null, null, t); mk('td', weighted ? 'GWA (weighted by units)' : 'Average', null, tr).style.fontWeight = 'bold';
+      if (college) mk('td', usum ? String(usum) : '', null, tr);
+      mk('td', avg.toFixed(2), null, tr).style.fontWeight = 'bold'; mk('td', '', null, tr);
+    }
+  });
+}
+
+function grMy(box) {
+  box.textContent = 'Loading...';
+  api('gReport').then(function (r) {
+    GR_PASS = r.passing || GR_PASS; GR_CPASS = r.collegePassing || GR_CPASS; box.textContent = '';
+    if (!r.students.length) { mk('p', 'No student is linked to your account yet. Open the "Link a Student" tab and enter the Student ID and the access code given by the school office.', null, box); return; }
+    r.students.forEach(function (s) { grCard(box, s); });
+    var lv = r.students.map(function (x) { return x.level; });
+    mk('p', 'Passing grade: ' + [lv.indexOf('Basic') > -1 ? GR_PASS + ' (Basic Education)' : '', lv.indexOf('College') > -1 ? GR_CPASS.toFixed(1) + ' or better (College, 1.0 is the highest)' : ''].filter(Boolean).join(' / ') + '. For questions about a grade, please contact the school office.', 'note', box);
+  }).catch(function (e) { box.textContent = e.message; });
+}
+
+function grLink(box) {
+  mk('p', 'Enter the Student ID and the access code given to you by the school office to see the grades of that student.', null, box);
+  var id = mk('input', null, null, mk('div', null, null, box)); id.placeholder = 'Student ID'; id.maxLength = 30;
+  var code = mk('input', null, null, mk('div', null, null, box)); code.placeholder = 'Access code'; code.maxLength = 20; code.style.marginTop = '8px';
+  var msg = mk('div', null, 'msg', box), go = mk('button', 'Link Student', 'btn-main', box);
+  go.onclick = function () {
+    go.disabled = true; msg.className = 'msg'; msg.textContent = 'Please wait...';
+    api('gLink', { studentId: id.value, code: code.value }).then(function () { grTab = 'my'; grShow(); })
+      .catch(function (e) { msg.textContent = e.message; go.disabled = false; });
+  };
+}
+
+function grEnc(box) {
+  box.textContent = 'Loading...';
+  grLoadStaff(function () {
+    box.textContent = '';
+    var secs = grSections();
+    if (!secs.length) { mk('p', 'No students yet. The registrar adds students in the Registrar dashboard.', null, box); return; }
+    var row = mk('div', null, null, box); row.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px';
+    var sy = grFld(row, 'School year', mk('input')); sy.value = grSY();
+    var sec = grFld(row, 'Section', mk('select')); secs.forEach(function (x) { mk('option', x, null, sec); });
+    var term = grFld(row, 'Term', mk('select')); GR_BASIC.forEach(function (x) { mk('option', x, null, term); });
+    var sem = grFld(row, 'Semester', mk('select')); GR_SEMS.forEach(function (x) { mk('option', x, null, sem); });
+    var per = grFld(row, 'Period', mk('select')); GR_PERIODS.forEach(function (x) { mk('option', x, null, per); });
+    var sub = grFld(row, 'Subject', mk('input')); sub.setAttribute('list', 'grSubj'); sub.maxLength = 60;
+    var units = grFld(row, 'Units', mk('input')); units.type = 'number'; units.min = '0.5'; units.max = '12'; units.step = '0.5';
+    var dl = mk('datalist', null, null, box); dl.id = 'grSubj'; grSubjects.forEach(function (x) { mk('option', null, null, dl).value = x; });
+    var hint = mk('div', null, 'who', box); hint.style.marginTop = '8px';
+    var show = function (el, on) { el.parentNode.style.display = on ? '' : 'none'; };
+    var isCol = function () { return grLevel(sec.value) === 'College'; };
+    var sync = function () {
+      var c = isCol(); show(term, !c); show(sem, c); show(per, c); show(units, c);
+      hint.textContent = c ? 'College: enter grades from 1.0 (highest) to 5.0. ' + GR_CPASS.toFixed(1) + ' is the lowest passing grade. Units are required. You may also type INC, DRP or W.'
+        : 'Basic Education: enter grades from 0 to 100 (passing is ' + GR_PASS + '). You may also type INC, DRP or W.';
+    };
+    sec.onchange = sync; sync();
+    var go = mk('button', 'Load class', 'btn-main', box), out = mk('div', null, null, box); go.type = 'button';
+    go.onclick = function () {
+      if (!sub.value.trim()) { out.textContent = 'Please enter the subject.'; return; }
+      var termVal = isCol() ? sem.value + ' - ' + per.value : term.value;
+      out.textContent = 'Loading...';
+      api('gClass', { sy: sy.value, term: termVal, section: sec.value, subject: sub.value.trim() }).then(function (r) {
+        out.textContent = '';
+        if (!r.students.length) { out.textContent = 'No students in this section.'; return; }
+        if (r.units && isCol()) units.value = r.units;
+        mk('h2', sec.value + ' \u2022 ' + sub.value.trim() + ' \u2022 ' + termVal, null, out);
+        var w = mk('div', null, 'tbl', out), t = mk('table', null, null, w), hr = mk('tr', null, null, t), inputs = [];
+        ['Student ID', 'Name', isCol() ? 'Grade (1.0-5.0, or INC / DRP / W)' : 'Grade (0-100, or INC / DRP / W)'].forEach(function (h) { mk('th', h, null, hr); });
+        r.students.forEach(function (s) {
+          var tr = mk('tr', null, null, t); mk('td', s.id, null, tr); mk('td', s.name, null, tr);
+          var inp = mk('input', null, null, mk('td', null, null, tr)); inp.value = s.grade; inp.maxLength = 6; inp.style.maxWidth = '120px'; inputs.push([s.id, inp]);
+        });
+        var msg = mk('div', null, 'msg', out), save = mk('button', 'Save grades', 'btn-main', out);
+        save.onclick = function () {
+          save.disabled = true; msg.className = 'msg'; msg.textContent = 'Saving...';
+          api('gSave', { sy: sy.value, term: termVal, subject: sub.value.trim(), units: units.value, entries: inputs.map(function (p) { return { id: p[0], grade: p[1].value }; }) })
+            .then(function () { msg.className = 'msg ok'; msg.textContent = 'Saved!'; if (grSubjects.indexOf(sub.value.trim()) < 0) grSubjects.push(sub.value.trim()); })
+            .catch(function (e) { msg.textContent = e.message; }).then(function () { save.disabled = false; });
+        };
+      }).catch(function (e) { out.textContent = e.message; });
+    };
+  });
+}
+
+function grRep(box) {
+  box.textContent = 'Loading...';
+  grLoadStaff(function () {
+    box.textContent = '';
+    var sel = mk('select', null, null, box), out = mk('div', null, null, box);
+    mk('option', '\u2014 choose a student \u2014', null, sel).value = '';
+    grStudents.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (s) {
+      mk('option', s.name + ' (' + s.id + ') \u2022 ' + s.section, null, sel).value = s.id;
+    });
+    sel.style.cssText = 'width:100%;padding:10px;border:1px solid #aab2c5;border-radius:6px;font:16px Arial,sans-serif';
+    sel.onchange = function () {
+      out.textContent = ''; if (!sel.value) return; out.textContent = 'Loading...';
+      api('gReport', { studentId: sel.value }).then(function (r) {
+        GR_PASS = r.passing || GR_PASS; GR_CPASS = r.collegePassing || GR_CPASS; out.textContent = ''; r.students.forEach(function (s) { grCard(out, s); });
+      }).catch(function (e) { out.textContent = e.message; });
+    };
+  });
+}
+
+$('openGr').addEventListener('click', function (e) {
+  e.preventDefault(); grTab = isStaff() ? 'enc' : 'my'; openOv($('grModal')); grShow();
 });
 </script>
 
