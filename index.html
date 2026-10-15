@@ -1100,9 +1100,17 @@ var auth = { token: null, user: null };
 try { auth.token = localStorage.getItem('slcs_token'); } catch (e) {}
 var $ = function (id) { return document.getElementById(id); };
 
+// A random ID saved in this browser; the server can use it to tie an account to one device
+function deviceId() {
+  try {
+    var d = localStorage.getItem('slcs_dev');
+    if (!d) { d = (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36)); localStorage.setItem('slcs_dev', d); }
+    return d;
+  } catch (e) { return 'nostorage'; }
+}
 function api(action, data) {
   if (API_URL.indexOf('PASTE_') === 0) return Promise.reject(new Error('The database is not connected yet.'));
-  var body = Object.assign({ action: action, token: auth.token }, data || {});
+  var body = Object.assign({ action: action, token: auth.token, deviceId: deviceId() }, data || {});
   return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
     .then(function (r) { return r.json(); })
     .then(function (r) { if (!r.ok) throw new Error(r.error || 'Something went wrong.'); return r; });
@@ -1675,6 +1683,13 @@ function monRender() {
       }
       mk('td', u.created ? monWhen(u.created) : '-', null, tr);
       var dc = mk('td', null, null, tr);
+      if (!u.you) {
+        var rb = mk('button', 'Release device', 'sch-btn', dc); rb.style.marginRight = '6px';
+        rb.onclick = function () {
+          if (!confirm('Free the device(s) used by ' + u.name + '? They will be signed out and the device can be used by another account.')) return;
+          api('devRelease', { email: u.email }).then(function () { alert('Device released.'); }).catch(function (err) { alert(err.message); });
+        };
+      }
       if (!u.you) mk('button', 'Delete', 'sch-btn', dc).onclick = function () {
         if (!confirm('Delete the account of ' + u.name + '? They will be signed out.')) return;
         api('delUser', { email: u.email }).then(loadUsers).catch(function (err) { alert(err.message); });
